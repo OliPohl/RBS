@@ -18,7 +18,7 @@ class Win(tk.Tk):
         
         for monitor in get_monitors():                  # finds main monitor and saves screenSize
             if monitor.is_primary:
-                self.geometry(('{w}x{h}'.format(w=monitor.width, h=monitor.height)))
+                self.geometry(('{w}x{h}+{x}+{y}'.format(w=monitor.width, h=monitor.height, x=monitor.x, y=monitor.y)))
                 break
         
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
