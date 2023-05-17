@@ -24,6 +24,8 @@ class Win(tk.Tk):
             if monitor.is_primary:
                 self.screenWidth = monitor.width
                 self.screenHeight = monitor.height
+                # self.screenWidth = 1920
+                # self.screenHeight = 1080
                 self.screenX = monitor.x
                 self.screenY = monitor.y
                 self.geometry(('{w}x{h}+{x}+{y}'.format(w=self.screenWidth, h=self.screenHeight, x=self.screenX, y=self.screenY)))
@@ -46,7 +48,7 @@ class Win(tk.Tk):
         
         # Timer Bottom Left
         time = tk.Label(bgCanvas, text="00:00", font=(self.FONT, self.TIME_SIZE, "bold"), bg="#a6a7a9", fg="White")
-        time.pack(anchor="sw", side="bottom", pady=52, padx=90)
+        time.pack(anchor="sw", side="bottom", pady=self.screenWidth/49.2, padx=self.screenHeight/16)
 
 
 
