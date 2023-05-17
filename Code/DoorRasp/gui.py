@@ -10,8 +10,7 @@ class Win(tk.Tk):
     FONT = "Arial"
     LABEL_SIZE = 20
     TEXT_SIZE = 16
-    
-    TRIANGLES_SIZE = 800
+    TIME_SIZE = 37
     
     def __init__(self):
         tk.Tk.__init__(self, None)
@@ -23,9 +22,11 @@ class Win(tk.Tk):
         
         for monitor in get_monitors():                  # finds main monitor and saves screenSize
             if monitor.is_primary:
-                self.geometry(('{w}x{h}+{x}+{y}'.format(w=monitor.width, h=monitor.height, x=monitor.x, y=monitor.y)))
                 self.screenWidth = monitor.width
                 self.screenHeight = monitor.height
+                self.screenX = monitor.x
+                self.screenY = monitor.y
+                self.geometry(('{w}x{h}+{x}+{y}'.format(w=self.screenWidth, h=self.screenHeight, x=self.screenX, y=self.screenY)))
                 break
             
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
@@ -34,21 +35,18 @@ class Win(tk.Tk):
         bgCanvas = tk.Canvas(self, bg='SkyBlue4', highlightthickness=0)        
         bgCanvas.pack(fill=tk.BOTH, expand=True)
         
-        # create the rectangles on the top right and bottom left edges of the screen
-        bgCanvas.create_polygon([self.screenWidth, 0, self.screenWidth, self.TRIANGLES_SIZE/2, self.screenWidth - self.TRIANGLES_SIZE, 0], fill="Light Blue")
-        bgCanvas.create_polygon([0, self.screenHeight, self.TRIANGLES_SIZE, self.screenHeight, 0, self.screenHeight - self.TRIANGLES_SIZE/2], fill="Light Blue")
+        # Loading in Background Image
+        bgImg = Image.open("Assets\Background.png")
+        bgImg = bgImg.resize((self.screenWidth, self.screenHeight), Image.LANCZOS)
+        bgImg = ImageTk.PhotoImage(bgImg)
         
-        # logo
-        logo = Image.open("Assets\Logo.png")
-        logo = logo.resize((570, 160), Image.LANCZOS)
-        logo = ImageTk.PhotoImage(logo)
+        bgImgPanel = tk.Label(bgCanvas, image=bgImg)
+        bgImgPanel.image = bgImg
+        bgImgPanel.place(x=-2, y=-2)
         
-        logoPanel = tk.Label(bgCanvas, image=logo)
-        logoPanel.image = logo
-        logoPanel.place(x=self.screenWidth - 5, y=5, anchor="ne")
-
-
-
+        # Timer Bottom Left
+        time = tk.Label(bgCanvas, text="00:00", font=(self.FONT, self.TIME_SIZE, "bold"), bg="#a6a7a9", fg="White")
+        time.pack(anchor="sw", side="bottom", pady=52, padx=90)
 
 
 
@@ -59,7 +57,6 @@ class Win(tk.Tk):
 
 def main():
     root = Win()
-    # root.wm_attributes('-transparentcolor', root['bg'])
     
     root.DefaultScreen()
     
