@@ -38,7 +38,7 @@ class Win(tk.Tk):
         bgCanvas.pack(fill=tk.BOTH, expand=True)
         
         # Loading in Background Image
-        bgImg = Image.open("Assets\Background.png")
+        bgImg = Image.open("Assets\Background2.png")
         bgImg = bgImg.resize((self.screenWidth, self.screenHeight), Image.LANCZOS)
         bgImg = ImageTk.PhotoImage(bgImg)
         
@@ -46,9 +46,15 @@ class Win(tk.Tk):
         bgImgPanel.image = bgImg
         bgImgPanel.place(x=-2, y=-2)
         
-        # Timer Bottom Left
-        time = tk.Label(bgCanvas, text="00:00", font=(self.FONT, self.TIME_SIZE, "bold"), bg="#a6a7a9", fg="White")
-        time.pack(anchor="sw", side="bottom", pady=self.screenWidth/49.2, padx=self.screenHeight/16)
+        # Create a Frame for border
+        clockPanel = tk.Frame(bgCanvas, background="White")
+
+        # Clock Bottom Left
+        clock = tk.Label(clockPanel, text="00:00", font=(self.FONT, self.TIME_SIZE, "bold"), bg="#a6a7a9", fg="White")
+        clock.pack(padx=5, pady=5)
+        clockPanel.pack(anchor="sw", side="bottom", pady=self.screenWidth/49.2, padx=self.screenHeight/16)
+
+
 
 
 
