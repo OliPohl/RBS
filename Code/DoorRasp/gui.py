@@ -30,6 +30,11 @@ class Win(tk.Tk):
                 self.geometry(('{w}x{h}+{x}+{y}'.format(w=self.screenWidth, h=self.screenHeight, x=self.screenX, y=self.screenY)))
                 break
             
+        # set some variables for later use
+        self.borderSize = round(self.screenWidth / 512)
+        self.h1Size = round(self.screenWidth / 70)
+        
+        # giving the programm an escape ;)    
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
         
         
@@ -49,8 +54,8 @@ class Win(tk.Tk):
         # Clock Bottom Left        
         clockPanel = tk.Frame(self.bgCanvas, background="White")
 
-        self.clock = tk.Label(clockPanel, text=" 00:00 ", font=(self.FONT, round(self.screenWidth / 70), "bold"), bg="#a6a7a9", fg="White")
-        self.clock.pack(padx=(self.screenWidth / 512), pady=(self.screenWidth / 512))
+        self.clock = tk.Label(clockPanel, text=" 00:00 ", font=(self.FONT, self.h1Size, "bold"), bg="#a6a7a9", fg="White")
+        self.clock.pack(padx=self.borderSize, pady=self.borderSize)
         
         clockPanel.pack(anchor="sw", side="bottom", padx=(self.screenWidth / 75), pady=(self.screenHeight / 50))
         self.UpdateClock()
@@ -68,22 +73,25 @@ class Win(tk.Tk):
         
         
     def DefaultPanel(self):
-        defaultPanel = tk.Frame(self.bgCanvas, background="White")
+        # sets the main panel in place
+        defaultPanel = tk.Frame(self.bgCanvas, background="Gray", highlightbackground="White", highlightthickness=self.borderSize)
+        defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
 
-        defaultGrid = tk.Frame(defaultPanel, background="Blue")
-        defaultGrid.grid(row=5, column=0, sticky=tk.W+tk.E)
+        # heading of the panel
+        label1 = tk.Label(defaultPanel, text="C125 - Leise - 5/7", font=(self.FONT, self.h1Size, "bold"), padx=5, pady=5, bg="Green", fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        label1.pack(side="top", fill="x")
 
-        # Add widgets to the grid
-        label1 = tk.Label(defaultGrid, text="C125 - Leise - 5/7", font=(self.FONT, round(self.screenWidth / 70), "bold"), padx=5, pady=5, bg="Green", fg="White")
-        label1.grid(row=0, column=0)
 
-        label2 = tk.Label(defaultGrid, text="Label 2")
-        label2.grid(row=1, column=0)
+        # buttons on the bottom
+        buttonFrame = tk.Frame(defaultPanel, bg="Gray")
+        buttonFrame.pack(side="top", pady=10)
 
-        label3 = tk.Label(defaultGrid, text="Label 3")
-        label3.grid(row=1, column=0, columnspan=2)
+        button1 = tk.Button(buttonFrame, text="Button 1", fg="White", bg="Blue")
+        button1.pack(side="left", padx=5)
 
-        defaultPanel.pack(side="top", pady=200)
+        button2 = tk.Button(buttonFrame, text="Button 2", fg="White", bg="Blue")
+        button2.pack(side="left", padx=5)
+
 
 
 
