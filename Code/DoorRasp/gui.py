@@ -38,9 +38,8 @@ class Win(tk.Tk):
         # giving the programm an escape ;)    
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
         
-        # start with default panel and draw background
-        self.Background()
-        self.DefaultPanel()
+        # start with default screen
+        self.DefaultScreen()
         
         
         
@@ -73,7 +72,10 @@ class Win(tk.Tk):
         
         
         
-    def DefaultPanel(self):
+    def DefaultScreen(self):
+        # Update background
+        self.Background()
+        
         # sets the main panel in place
         defaultPanel = tk.Frame(self.bgCanvas, background=self.GRAY, highlightbackground="White", highlightthickness=self.borderSize)
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
