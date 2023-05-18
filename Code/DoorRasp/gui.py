@@ -82,6 +82,10 @@ class Win(tk.Tk):
         # Update background
         self.Background()
         
+        # Settings Button
+        settingsBtn = tk.Button(self.bgCanvas, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        settingsBtn.place(relx=0.01, rely=0.02)
+        
         # Default Panel
         defaultPanel = tk.Frame(self.bgCanvas, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
@@ -95,14 +99,14 @@ class Win(tk.Tk):
         displayPanel.place(relx=0.15, rely=0.165, relwidth=0.7, relheight=0.6)
 
         # Buttons
-        buttonPanel = tk.Frame(defaultPanel, bg=self.CYAN,)
-        buttonPanel.pack(side="bottom", pady=self.borderSize*10)
+        btnPanel = tk.Frame(defaultPanel, bg=self.CYAN,)
+        btnPanel.pack(side="bottom", pady=self.borderSize*10)
 
-        button1 = tk.Button(buttonPanel, text="Einloggen", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
-        button1.pack(side="left", padx=self.borderSize*5)
+        einloggBtn = tk.Button(btnPanel, text="EINLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        einloggBtn.pack(side="left", padx=self.borderSize*5)
 
-        button2 = tk.Button(buttonPanel, text="Ausloggen", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
-        button2.pack(side="left", padx=self.borderSize*5)
+        ausloggBtn = tk.Button(btnPanel, text="AUSLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        ausloggBtn.pack(side="left", padx=self.borderSize*5)
 
 
 
