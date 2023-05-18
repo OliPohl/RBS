@@ -37,7 +37,13 @@ class Win(tk.Tk):
         # giving the programm an escape ;)    
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
         
+        # start with default panel and draw background
+        self.Background()
+        self.DefaultPanel()
         
+        
+        
+    def Background(self):
         # Loading in Background Image       
         self.bgCanvas = tk.Canvas(self, bg='SkyBlue4', highlightthickness=0)        
         self.bgCanvas.pack(fill=tk.BOTH, expand=True)
@@ -59,9 +65,6 @@ class Win(tk.Tk):
         
         clockPanel.pack(anchor="sw", side="bottom", padx=(self.screenWidth / 75), pady=(self.screenHeight / 50))
         self.UpdateClock()
-        
-        # start with default panel
-        self.DefaultPanel()
 
 
 
@@ -78,8 +81,8 @@ class Win(tk.Tk):
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
 
         # heading of the panel
-        label1 = tk.Label(defaultPanel, text="C125 - Leise - 5/7", font=(self.FONT, self.h1Size, "bold"), padx=5, pady=5, bg="Green", fg="White", highlightbackground="White", highlightthickness=self.borderSize)
-        label1.pack(side="top", fill="x")
+        heading = tk.Label(defaultPanel, text="C125 - Leise - 5/7", font=(self.FONT, self.h1Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg="Green", fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        heading.pack(side="top", fill="x")
 
 
         # buttons on the bottom
