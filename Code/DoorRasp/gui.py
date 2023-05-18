@@ -10,6 +10,7 @@ from time import strftime
 
 class Win(tk.Tk):
     FONT = "Arial"
+    GRAY = "#a6a7a9"
     
     def __init__(self):
         tk.Tk.__init__(self, None)
@@ -58,18 +59,15 @@ class Win(tk.Tk):
         
         
         # Clock Bottom Left        
-        clockPanel = tk.Frame(self.bgCanvas, background="White")
+        self.clock = tk.Label(self.bgCanvas, text="00:00", font=(self.FONT, self.h1Size, "bold"), bg=self.GRAY, fg="White", padx=self.borderSize*2, pady=self.borderSize, highlightbackground="White", highlightthickness=self.borderSize)
+        self.clock.place(relx=0.01, rely=0.92)
 
-        self.clock = tk.Label(clockPanel, text=" 00:00 ", font=(self.FONT, self.h1Size, "bold"), bg="#a6a7a9", fg="White")
-        self.clock.pack(padx=self.borderSize, pady=self.borderSize)
-        
-        clockPanel.pack(anchor="sw", side="bottom", padx=(self.screenWidth / 75), pady=(self.screenHeight / 50))
         self.UpdateClock()
 
 
 
     def UpdateClock(self):                              # takes the clock on the bottom left and updates it every second
-        time = strftime(' %H:%M ')                      #add %A for weekday name
+        time = strftime('%H:%M')                      #add %A for weekday name
         self.clock.config(text=time)
         self.after(1000, self.UpdateClock)
         
@@ -77,7 +75,7 @@ class Win(tk.Tk):
         
     def DefaultPanel(self):
         # sets the main panel in place
-        defaultPanel = tk.Frame(self.bgCanvas, background="Gray", highlightbackground="White", highlightthickness=self.borderSize)
+        defaultPanel = tk.Frame(self.bgCanvas, background=self.GRAY, highlightbackground="White", highlightthickness=self.borderSize)
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
 
         # heading of the panel
