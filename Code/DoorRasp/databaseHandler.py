@@ -4,6 +4,8 @@ class DatabaseHandler:
         self.roomProperties = {"isActive" : True, "loudSeats" : loudSeats, "quietSeats": quietSeats}
         
         self.database = open("localDatabase.txt", "r+")
+        
+        # Check if Romm exists in database
         try:
             self.databaseContent = eval(self.database.read())
             if self.databaseContent[self.roomId]['isActive']:
