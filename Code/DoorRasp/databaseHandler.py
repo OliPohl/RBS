@@ -66,7 +66,7 @@ class DatabaseHandler:
 
 
 def main():
-    databaseHandler = DatabaseHandler("C127", 7, 10)
+    databaseHandler = DatabaseHandler("C125", 7, 10)
     
     databaseHandler.Logout()
 
