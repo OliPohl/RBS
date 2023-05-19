@@ -1,0 +1,3 @@
+C127 = {'isActive': True, 'loudMaxSeats': 7, 'quietMaxSeats': 10}
+C127 = {'isActive': True, 'loudMaxSeats': 7, 'quietMaxSeats': 10}
+C127 = {'isActive': True, 'loudMaxSeats': 7, 'quietMaxSeats': 10}
