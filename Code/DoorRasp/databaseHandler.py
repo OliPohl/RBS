@@ -7,6 +7,7 @@ class DatabaseHandler:
         
         # Check if Romm exists in database
         try:
+            self.database.seek(0)
             self.databaseContent = eval(self.database.read())
             if self.databaseContent.get(self.roomId, {}).get('isActive'):
                 print("### Exception: {roomId} is currently active. Room data is being overwritten to ensure consistency. If you encounter any issues, please verify that there are no other rooms logged in with the same ID.".format(roomId=self.roomId))
@@ -37,11 +38,35 @@ class DatabaseHandler:
 
 
 
+    def Logout(self):
+        self.database.seek(0)
+        self.databaseContent = eval(self.database.read())
+        
+        # changing room status to inactive
+        self.databaseContent.setdefault(self.roomId, {}).update({"isActive": False})
+        self.database.seek(0)
+        self.database.write(str(self.databaseContent))
+        self.database.truncate()
+        
+        # checking if status has changed
+        self.database.seek(0)
+        self.databaseContent = eval(self.database.read())
+        
+        if self.roomId in self.databaseContent:
+            roomData = self.databaseContent[self.roomId]
+            if roomData.get("isActive"):
+                print("Failed to log out Room {roomId} from the database.".format(roomId=self.roomId))
+            else:
+                print("Room {roomId} has successfully logged out of the database.".format(roomId=self.roomId))
+            
+        self.database.close
 
 
 
 def main():
     databaseHandler = DatabaseHandler("C127", 7, 10)
+    
+    databaseHandler.Logout()
 
 
 if __name__ == "__main__":
