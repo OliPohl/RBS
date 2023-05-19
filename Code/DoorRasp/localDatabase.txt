@@ -1,1 +1,0 @@
-{'C125': {'isActive': False, 'loudSeats': 7, 'quietSeats': 10}, 'C127': {'isActive': False, 'loudSeats': 7, 'quietSeats': 10}}

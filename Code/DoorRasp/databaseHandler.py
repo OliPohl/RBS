@@ -1,8 +1,13 @@
+import os
+
+
 class DatabaseHandler:
     def __init__(self, roomId: str, loudSeats: int, quietSeats: int):
         self.roomId = roomId
         self.roomProperties = {"isActive" : True, "loudSeats" : loudSeats, "quietSeats": quietSeats}
         
+        if not os.path.isfile("localDatabase.txt"):
+            open("localDatabase.txt", "x")
         self.database = open("localDatabase.txt", "r+")
         
         # Check if Romm exists in database
@@ -66,7 +71,7 @@ class DatabaseHandler:
 
 
 def main():
-    databaseHandler = DatabaseHandler("C125", 7, 10)
+    databaseHandler = DatabaseHandler("C127", 7, 10)
     
     databaseHandler.Logout()
 
