@@ -6,13 +6,15 @@ class DatabaseHandler:
         self.database = open("localDatabase.txt", "r+")
         
         # Check if Romm exists in database
-        try:
-            self.database.seek(0)
-            self.databaseContent = eval(self.database.read())
-            if self.databaseContent.get(self.roomId, {}).get('isActive'):
-                print("### Exception: {roomId} is currently active. Room data is being overwritten to ensure consistency. If you encounter any issues, please verify that there are no other rooms logged in with the same ID.".format(roomId=self.roomId))
-        except:
-            self.databaseContent = {}
+        self.database.seek(0)
+        self.databaseContent = {}
+        
+        databaseString = self.database.read()
+        if databaseString:
+            self.databaseContent = eval(databaseString)
+
+        if self.databaseContent.get(self.roomId, {}).get('isActive'):
+            print("### Exception: {roomId} is currently active. Room data is being overwritten to ensure consistency. If you encounter any issues, please verify that there are no other rooms logged in with the same ID.".format(roomId=self.roomId))
         
         
         # Logging into room
