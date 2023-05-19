@@ -7,6 +7,8 @@ from PIL import ImageTk, Image
 from screeninfo import get_monitors
 from time import strftime
 
+from databaseHandler import *
+
 
 class Win(tk.Tk):
     FONT = "Arial"
@@ -44,6 +46,9 @@ class Win(tk.Tk):
         # giving the programm an escape ;)    
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
         
+        # Log into Database
+        self.databaseHandler = DatabaseHandler("C125", 6, 10)
+        
         # start with default screen
         self.DefaultScreen()
         
@@ -51,20 +56,20 @@ class Win(tk.Tk):
         
     def Background(self):
         # Loading in Background Image       
-        self.bgCanvas = tk.Canvas(self, bg='SkyBlue4', highlightthickness=0)        
-        self.bgCanvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas = tk.Canvas(self, bg='SkyBlue4')        
+        self.canvas.pack(fill=tk.BOTH, expand=True)
         
         bgImg = Image.open("Assets\Background2.png")
         bgImg = bgImg.resize((self.screenWidth, self.screenHeight), Image.LANCZOS)
         bgImg = ImageTk.PhotoImage(bgImg)
         
-        bgImgPanel = tk.Label(self.bgCanvas, image=bgImg)
+        bgImgPanel = tk.Label(self.canvas, image=bgImg)
         bgImgPanel.image = bgImg
         bgImgPanel.place(x=-2, y=-2)
         
         
         # Clock Bottom Left        
-        self.clock = tk.Label(self.bgCanvas, text="00:00", font=(self.FONT, self.timeSize, "bold"), bg=self.GRAY, fg="White", padx=self.borderSize*2, pady=self.borderSize, highlightbackground="White", highlightthickness=self.borderSize)
+        self.clock = tk.Label(self.canvas, text="00:00", font=(self.FONT, self.timeSize, "bold"), bg=self.GRAY, fg="White", padx=self.borderSize*2, pady=self.borderSize, highlightbackground="White", highlightthickness=self.borderSize)
         self.clock.place(relx=0.01, rely=0.92)
 
         self.UpdateClock()
@@ -83,11 +88,11 @@ class Win(tk.Tk):
         self.Background()
         
         # Settings Button
-        settingsBtn = tk.Button(self.bgCanvas, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        settingsBtn = tk.Button(self.canvas, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
         settingsBtn.place(relx=0.01, rely=0.02)
         
         # Default Panel
-        defaultPanel = tk.Frame(self.bgCanvas, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
+        defaultPanel = tk.Frame(self.canvas, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
 
         # Titlebar
