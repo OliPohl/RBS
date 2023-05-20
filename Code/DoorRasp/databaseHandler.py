@@ -61,12 +61,12 @@ class DatabaseHandler:
         
         if self.roomId in self.databaseContent:
             roomData = self.databaseContent[self.roomId]
-            if roomData.get("isActive"):
-                print("Failed to log out Room {roomId} from the database.".format(roomId=self.roomId))
-            else:
+            if not roomData.get("isActive"):
+                self.database.close
                 print("Room {roomId} has successfully logged out of the database.".format(roomId=self.roomId))
-            
-        self.database.close
+                return
+
+        print("Failed to log out Room {roomId} from the database.".format(roomId=self.roomId))
         
         
     
