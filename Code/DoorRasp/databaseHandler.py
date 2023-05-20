@@ -30,7 +30,6 @@ class DatabaseHandler:
 
 
     def Logout(self):
-        self.databaseContent = self.GetDatabaseContent()
         self.databaseContent = self.UpdateDatabase("isActive", False)
         
         if not self.databaseContent.get(self.roomId, {}).get("isActive"):
@@ -53,6 +52,7 @@ class DatabaseHandler:
         
     
     def UpdateDatabase(self, property: str, value):
+        self.databaseContent = self.GetDatabaseContent()
         self.databaseContent.setdefault(self.roomId, {}).update({property: value})
         self.database.seek(0)
         self.database.write(str(self.databaseContent))
@@ -68,7 +68,6 @@ class DatabaseHandler:
         
         
     def SetProperty(self, property: str, value):
-        self.databaseContent = self.GetDatabaseContent()
         self.databaseContent = self.UpdateDatabase(property, value)
         
         if self.databaseContent.get(self.roomId, {}).get(property) == value:
