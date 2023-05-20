@@ -70,23 +70,23 @@ class DatabaseHandler:
         
         
     
-    def GetRoomState(self):
+    def GetProperty(self, property: str):
         self.database.seek(0)
         self.databaseContent = eval(self.database.read())
         
         if self.roomId in self.databaseContent:
             roomData = self.databaseContent[self.roomId]
-            return roomData.get("roomState")
+            return roomData.get(property)
 
-        print("Error couldnt find room.")
+        print("Could not find room {roomId} in Database.".format(roomId=self.roomId))
         
         
         
-    def SetRoomState(self, roomState: str):
+    def SetProperty(self, property: str, value):
         self.database.seek(0)
         self.databaseContent = eval(self.database.read())
         
-        self.databaseContent.setdefault(self.roomId, {}).update({"roomState": roomState})
+        self.databaseContent.setdefault(self.roomId, {}).update({"property": value})
         self.database.seek(0)
         self.database.write(str(self.databaseContent))
         self.database.truncate()
@@ -96,79 +96,11 @@ class DatabaseHandler:
         
         if self.roomId in self.databaseContent:
             roomData = self.databaseContent[self.roomId]
-            if roomData.get("roomState") == roomState:
-                print("Successfully chaning roomstate for room {roomId} to {roomState}.".format(roomId=self.roomId, roomState=roomData["roomState"]))
+            if roomData.get("property") == value:
+                print("Successfully changed {property} to {value} roomstate for room {roomId}.".format(roomId=self.roomId, property=property, value=self.databaseContent[self.roomId][property]))
                 return
         
-        print("Failed to change roomState for room {roomId}.".format(roomId=self.roomId))
-        
-        
-        
-    def GetLoudSeats(self):
-        self.database.seek(0)
-        self.databaseContent = eval(self.database.read())
-        
-        if self.roomId in self.databaseContent:
-            roomData = self.databaseContent[self.roomId]
-            return roomData.get("loudSeats")
-        
-        print("Error couldnt find room.")
-        
-        
-        
-    def SetLoudSeats(self, loudSeats: int):
-        self.database.seek(0)
-        self.databaseContent = eval(self.database.read())
-        
-        self.databaseContent.setdefault(self.roomId, {}).update({"loudSeats": loudSeats})
-        self.database.seek(0)
-        self.database.write(str(self.databaseContent))
-        self.database.truncate()
-        
-        self.database.seek(0)
-        self.databaseContent = eval(self.database.read())
-        
-        if self.roomId in self.databaseContent:
-            roomData = self.databaseContent[self.roomId]
-            if roomData.get("loudSeats") == loudSeats:
-                print("Successfully chaning roomstate for room {roomId} to {loudSeats}.".format(roomId=self.roomId, loudSeats=roomData["loudSeats"]))
-                return
-        
-        print("Failed to change roomState for room {roomId}.".format(roomId=self.roomId))   
-        
-        
-    
-    def GetQuietSeats(self):
-        self.database.seek(0)
-        self.databaseContent = eval(self.database.read())
-        
-        if self.roomId in self.databaseContent:
-            roomData = self.databaseContent[self.roomId]
-            return roomData.get("quietSeats")
-        
-        print("Error couldnt find room.")
-        
-        
-        
-    def SetLoudSeats(self, quietSeats: int):
-        self.database.seek(0)
-        self.databaseContent = eval(self.database.read())
-        
-        self.databaseContent.setdefault(self.roomId, {}).update({"quietSeats": quietSeats})
-        self.database.seek(0)
-        self.database.write(str(self.databaseContent))
-        self.database.truncate()
-        
-        self.database.seek(0)
-        self.databaseContent = eval(self.database.read())
-        
-        if self.roomId in self.databaseContent:
-            roomData = self.databaseContent[self.roomId]
-            if roomData.get("quietSeats") == quietSeats:
-                print("Successfully chaning roomstate for room {roomId} to {quietSeats}.".format(roomId=self.roomId, quietSeats=roomData["quietSeats"]))
-                return
-        
-        print("Failed to change roomState for room {roomId}.".format(roomId=self.roomId))   
+        print("Failed to change property for room {roomId}.".format(roomId=self.roomId))
 
 
 
