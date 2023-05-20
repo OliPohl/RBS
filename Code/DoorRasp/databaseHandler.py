@@ -67,6 +67,46 @@ class DatabaseHandler:
                 print("Room {roomId} has successfully logged out of the database.".format(roomId=self.roomId))
             
         self.database.close
+        
+        
+    
+    def GetRoomState(self):
+        self.database.seek(0)
+        self.databaseContent = eval(self.database.read())
+        
+        if self.roomId in self.databaseContent:
+            roomData = self.databaseContent[self.roomId]
+            return roomData.get("roomState")
+        else:
+            print("Error couldnt find room.")
+            return 1
+        
+        
+        
+    def SetRoomState(self, roomState: str):
+        self.database.seek(0)
+        self.databaseContent = eval(self.database.read())
+        
+        self.databaseContent.setdefault(self.roomId, {}).update({"roomState": roomState})
+        self.database.seek(0)
+        self.database.write(str(self.databaseContent))
+        self.database.truncate()
+        
+        self.database.seek(0)
+        self.databaseContent = eval(self.database.read())
+        
+        if self.roomId in self.databaseContent:
+            roomData = self.databaseContent[self.roomId]
+            if roomData.get("roomState") == roomState:
+                print("Successfully chaning roomstate for room {roomId} to {roomState}.".format(roomId=self.roomId, roomState=roomData["roomState"]))
+                return
+        
+        print("Failed to change roomState for room {roomId}.".format(roomId=self.roomId))
+        
+        
+        
+    def SetRoomProperties(self, loudSeats: int, quietSeats: int, roomState: str):
+        pass 
 
 
 
