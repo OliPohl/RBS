@@ -4,7 +4,7 @@ import os
 class DatabaseHandler:
     def __init__(self, roomId: str, loudSeats: int, quietSeats: int):
         self.roomId = roomId
-        self.roomProperties = {"isActive" : True, "loudSeats" : loudSeats, "quietSeats": quietSeats}
+        self.roomProperties = {"isActive" : True, "loudSeats" : loudSeats, "quietSeats" : quietSeats, "roomState" : "Empty"}
         
         if not os.path.isfile("localDatabase.txt"):
             open("localDatabase.txt", "x")
@@ -18,7 +18,7 @@ class DatabaseHandler:
         if databaseString:
             self.databaseContent = eval(databaseString)
 
-        if self.databaseContent.get(self.roomId, {}).get('isActive'):
+        if self.databaseContent.get(self.roomId, {}).get("isActive"):
             print("### Exception: {roomId} is currently active. Room data is being overwritten to ensure consistency. If you encounter any issues, please verify that there are no other rooms logged in with the same ID.".format(roomId=self.roomId))
         
         
@@ -41,7 +41,7 @@ class DatabaseHandler:
         else:
             raise Exception("Room with ID {roomId} doesn't exist in the database. Please ensure that the RaspberryPi is connected to the database.".format(roomId=self.roomId))
         
-        print("Successfully logged into Database:\n---\nRoom ID: {roomId}\nLoud Seats: {loudSeats}\nQuiet Seats: {quietSeats}\n---".format(roomId=self.roomId, loudSeats=self.databaseContent[self.roomId]["loudSeats"], quietSeats=self.databaseContent[self.roomId]["quietSeats"]))
+        print("Successfully logged into Database:\n---\nRoom ID: {roomId}\nLoud Seats: {loudSeats}\nQuiet Seats: {quietSeats}\nRoom State: {roomState}\n---".format(roomId=self.roomId, loudSeats=self.databaseContent[self.roomId]["loudSeats"], quietSeats=self.databaseContent[self.roomId]["quietSeats"], roomState=self.databaseContent[self.roomId]["roomState"]))
 
 
 
