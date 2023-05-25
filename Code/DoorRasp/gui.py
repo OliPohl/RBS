@@ -104,7 +104,7 @@ class Win(tk.Tk):
         displayPanel.place(relx=0.15, rely=0.165, relwidth=0.7, relheight=0.6)
 
         # Buttons
-        btnPanel = tk.Frame(defaultPanel, bg=self.CYAN,)
+        btnPanel = tk.Frame(defaultPanel, bg=self.CYAN)
         btnPanel.pack(side="bottom", pady=self.borderSize*10)
 
         einloggBtn = tk.Button(btnPanel, text="EINLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
