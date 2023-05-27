@@ -64,6 +64,10 @@ h3 {
 	background-color: #ff08;
 }
 
+.prof {
+	background-color: #0008;
+}
+
 .bar {
 	height: 1rem;
 	margin-top: 5%;
@@ -80,6 +84,6 @@ h3 {
 	text-align: center;
 }
 
-.bar[remainingTime=""] {
+.bar[remainingTime="0 min"] {
 	display: none;
 }

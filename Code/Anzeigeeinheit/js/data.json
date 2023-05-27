@@ -1,0 +1,66 @@
+{
+  "rooms": [
+    {
+      "id": "A226",
+      "size": 2,
+      "x": "0",
+      "y": "0",
+      "state": "empty",
+      "entries": [
+        {
+          "id": "",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "id": "",
+          "startTime": "",
+          "endTime": ""
+        }
+      ]
+    },
+    {
+      "id": "C125",
+      "size": 3,
+      "x": "50%",
+      "y": "25%",
+      "state": "quiet",
+      "entries": [
+        {
+          "id": "sdfrsdcf",
+          "startTime": "2011-10-10T14:48",
+          "endTime": "2011-10-10T14:53"
+        },
+        {
+          "id": "",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "id": "",
+          "startTime": "",
+          "endTime": ""
+        }
+      ]
+    },
+    {
+      "id": "F125",
+      "size": 2,
+      "x": "25%",
+      "y": "60%",
+      "state": "full",
+      "entries": [
+        {
+          "id": "sdfrsdcf",
+          "startTime": "2011-10-10T14:48",
+          "endTime": "2011-10-10T15:53"
+        },
+        {
+          "id": "sdfrsdcf",
+          "startTime": "2011-10-10T14:48",
+          "endTime": "2011-10-10T15:30"
+        }
+      ]
+    }
+  ]
+}
