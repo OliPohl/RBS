@@ -13,6 +13,7 @@ class Entry {
   }
 
   remainingTime() { // gibt an, wie lange eine Buchung noch dauert (in Minuten)
+    // aktuell wird die Dauer zwischen Startzeitpunkt und Endzeitpunkt ausgegeben; für die spätere Anwendung sollte die Dauer zwischen aktuellem Zeitpunkt und Endzeitpunkt ausgegeben werden
     return Math.round((Date.parse(this.endTime) - Date.parse(this.startTime)) / 60000);
   }
 }
@@ -70,6 +71,9 @@ async function updateData() {
       if (rooms[i].entries[j].id != "") {
         rooms[i].entries[j].startTime = roomsJSON.rooms[i].entries[j].startTime;
         rooms[i].entries[j].endTime = roomsJSON.rooms[i].entries[j].endTime;
+      } else {
+        rooms[i].entries[j].startTime = new Date();
+        rooms[i].entries[j].endTime = new Date();
       }
     }
   }
