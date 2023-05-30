@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 
 class DatabaseHandler:
@@ -89,7 +90,14 @@ class DatabaseHandler:
         self.databaseContent[self.roomId]["Entry"] = []
         self.UpdateDatabase("Entry", [])
         print("Deleted all entries for Room {roomId}.".format(roomId=self.roomId))
-
+        
+        
+    def DeleteExpiredEntries(self):
+        entries = self.databaseContent[self.roomId]["Entry"]
+        current_time = datetime.now()
+        updated_entries = [entry for entry in entries if datetime.strptime(entry["ExitTime"], "%H:%M") > current_time]
+        self.UpdateDatabase("Entry", updated_entries)
+        print("Deleted expired entries for Room {roomId}.".format(roomId=self.roomId))
 
         
     def GetDatabaseContent(self):
@@ -129,7 +137,7 @@ class DatabaseHandler:
 def main():
     databaseHandler = DatabaseHandler("C127", 7, 10)
     
-    databaseHandler.AddEntry("John123", "2023-05-30 10:00:00", "2023-05-30 12:00:00")
+    databaseHandler.AddEntry("John123", "10:00", "12:00")
     
     databaseHandler.Logout()
 
