@@ -4,13 +4,19 @@ import os
 class DatabaseHandler:
     def __init__(self, roomId: str, loudSeats: int, quietSeats: int):
         self.roomId = roomId
-        self.roomProperties = {"isActive" : True, "loudSeats" : loudSeats, "quietSeats" : quietSeats, "roomState" : "Empty"}
+        self.roomProperties = {
+            "isActive": True,
+            "loudSeats": loudSeats,
+            "quietSeats": quietSeats,
+            "roomState": "Empty",
+            "Entry": []
+        }
         
         if not os.path.isfile("localDatabase.txt"):
             open("localDatabase.txt", "x")
         self.database = open("localDatabase.txt", "r+")
         
-        # Check if Romm exists in database      
+        # Check if Room exists in the database      
         self.databaseContent = self.GetDatabaseContent()
 
         if self.databaseContent.get(self.roomId, {}).get("isActive"):
@@ -33,6 +39,7 @@ class DatabaseHandler:
         self.databaseContent = self.UpdateDatabase("isActive", False)
         
         if not self.databaseContent.get(self.roomId, {}).get("isActive"):
+            self.DeleteAllEntries()
             self.database.close
             print("Room {roomId} has successfully logged out of the database.".format(roomId=self.roomId))
             return
@@ -40,6 +47,50 @@ class DatabaseHandler:
         print("Failed to log out Room {roomId} from the database.".format(roomId=self.roomId))
         
         
+    def AddEntry(self, userId: str, entryTime: str, exitTime: str):
+        entry = {
+            "UserId": userId,
+            "EntryTime": entryTime,
+            "ExitTime": exitTime
+        }
+        self.databaseContent[self.roomId]["Entry"].append(entry)
+        self.UpdateDatabase("Entry", self.databaseContent[self.roomId]["Entry"])
+        print("Added entry for User {userId} with Entry Time: {entryTime} and Exit Time: {exitTime}.".format(userId=userId, entryTime=entryTime, exitTime=exitTime))
+        
+        
+    def DeleteEntry(self, userId: str):
+        entries = self.databaseContent[self.roomId]["Entry"]
+        removed_entries = [entry for entry in entries if entry["UserId"] == userId]
+        entries[:] = [entry for entry in entries if entry["UserId"] != userId]
+        self.UpdateDatabase("Entry", entries)
+        
+        if removed_entries:
+            print("Deleted all entries for User {userId}.".format(userId=userId))
+            return
+        
+        print("No entries found for User {userId}.".format(userId=userId))
+
+
+    def ScanUserId(self, userId: str):
+        entries = self.databaseContent[self.roomId]["Entry"]
+        user_entries = [entry for entry in entries if entry["UserId"] == userId]
+        if len(user_entries) > 0:
+            return True
+        return False
+    
+    
+    def GetEntryExitTimes(self):
+        entries = self.databaseContent[self.roomId]["Entry"]
+        entry_exit_times = [(entry["EntryTime"], entry["ExitTime"]) for entry in entries]
+        return entry_exit_times
+    
+    
+    def DeleteAllEntries(self):
+        self.databaseContent[self.roomId]["Entry"] = []
+        self.UpdateDatabase("Entry", [])
+        print("Deleted all entries for Room {roomId}.".format(roomId=self.roomId))
+
+
         
     def GetDatabaseContent(self):
         self.database.seek(0)
@@ -50,7 +101,6 @@ class DatabaseHandler:
             return {}
         
         
-    
     def UpdateDatabase(self, property: str, value):
         self.databaseContent = self.GetDatabaseContent()
         self.databaseContent.setdefault(self.roomId, {}).update({property: value})
@@ -60,11 +110,9 @@ class DatabaseHandler:
         return self.GetDatabaseContent()
 
         
-        
     def GetProperty(self, property: str):
         self.databaseContent = self.GetDatabaseContent()
         return self.databaseContent.get(property)
-        
         
         
     def SetProperty(self, property: str, value):
@@ -80,6 +128,8 @@ class DatabaseHandler:
 
 def main():
     databaseHandler = DatabaseHandler("C127", 7, 10)
+    
+    databaseHandler.AddEntry("John123", "2023-05-30 10:00:00", "2023-05-30 12:00:00")
     
     databaseHandler.Logout()
 
