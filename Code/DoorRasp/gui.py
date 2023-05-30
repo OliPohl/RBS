@@ -2,6 +2,7 @@ import os
 import numpy as np
 
 import tkinter as tk
+from tkinter import ttk
 
 from PIL import ImageTk, Image
 from screeninfo import get_monitors
@@ -39,9 +40,16 @@ class Win(tk.Tk):
         self.borderSize = round(self.screenWidth / 512)
         
         self.h1Size = round(self.screenWidth / 50)
+        self.h1Size = round(self.screenWidth / 75)
+        self.h3Size = round(self.screenWidth / 100)
         
         self.btn1Size = round(self.screenWidth / 70)
         self.timeSize = round(self.screenWidth / 70)
+        
+        # Style
+        s = ttk.Style()
+        s.theme_use('clam')
+        s.configure("Horizontal.TProgressbar", foreground=self.DARK_CYAN, background=self.DARK_CYAN, troughcolor=self.GRAY, darkcolor=self.GRAY, lightcolor=self.GRAY, bordercolor=self.GRAY)
         
         # giving the programm an escape ;)    
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
@@ -102,6 +110,18 @@ class Win(tk.Tk):
         # Display
         displayPanel = tk.Frame(defaultPanel, bg=self.GRAY, highlightbackground="White", highlightthickness=self.borderSize)
         displayPanel.place(relx=0.15, rely=0.165, relwidth=0.7, relheight=0.6)
+        
+        # Display Current Entries
+        bar = []
+        for i in range(10):
+            pb = ttk.Progressbar(displayPanel, orient="horizontal", mode="determinate", maximum=90, value=0, style="Horizontal.TProgressbar")
+            pb.place(relx=0, rely=i/10, relwidth=1, relheight=0.1)
+            pbLabel = tk.Label(pb, text="",  font=(self.FONT, self.h3Size, "bold"), fg="White", bg=self.DARK_CYAN)
+            pbLabel.place(relx=0, rely=0.065)
+
+            entryName = "entry" + str(i)
+            entry = {entryName: {"pb": pb, "label": pbLabel}}
+            bar.append(entry)
 
         # Buttons
         btnPanel = tk.Frame(defaultPanel, bg=self.CYAN)
