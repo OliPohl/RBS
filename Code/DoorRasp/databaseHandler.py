@@ -48,42 +48,47 @@ class DatabaseHandler:
         print("Failed to log out Room {roomId} from the database.".format(roomId=self.roomId))
         
         
-    def AddEntry(self, userId: str, entryTime: str, exitTime: str):
+    def AddEntry(self, userId: str, startTime: str, exitTime: str):
         entry = {
             "userId": userId,
-            "entryTime": entryTime,
+            "entryTime": startTime,
             "exitTime": exitTime
         }
         self.databaseContent[self.roomId]["entry"].append(entry)
         self.UpdateDatabase("entry", self.databaseContent[self.roomId]["entry"])
-        print("Added entry for User {userId} with entry Time: {entryTime} and Exit Time: {exitTime}.".format(userId=userId, entryTime=entryTime, exitTime=exitTime))
+        print("Added Entry for User {userId} with Entry Time: {startTime} and Exit Time: {exitTime}.".format(userId=userId, startTime=startTime, exitTime=exitTime))
         
         
     def DeleteEntry(self, userId: str):
         entries = self.databaseContent[self.roomId]["entry"]
-        removedEntries = [entry for entry in entries if entry["UserId"] == userId]
-        entries[:] = [entry for entry in entries if entry["UserId"] != userId]
-        self.UpdateDatabase("entry", entries)
         
-        if removedEntries:
-            print("Deleted all entries for User {userId}.".format(userId=userId))
+        if entries == []:
             return
         
-        print("No entries found for User {userId}.".format(userId=userId))
+        updatedEntries = []
+        for entry in entries:
+            if entry["userId"] != userId:
+                updatedEntries.append(entry)
+                
+        self.UpdateDatabase("entry", updatedEntries)
 
 
     def ScanUserId(self, userId: str):
         entries = self.databaseContent[self.roomId]["entry"]
-        entries = [entry for entry in entries if entry["UserId"] == userId]
-        if len(entries) > 0:
-            return True
+        if entries != []:
+            for entry in entries:
+                if entry["UserId"] == userId:
+                    return True
         return False
+
     
     
-    def GetEntryExitTimes(self):
+    def GetExitTimes(self):
         entries = self.databaseContent[self.roomId]["entry"]
-        entryExitTimes = [(entry["entryTime"], entry["ExitTime"]) for entry in entries]
-        return entryExitTimes
+        exitTimes = []
+        for entry in entries:
+            exitTimes.append(entry["exitTime"])
+        return exitTimes
     
     
     def GetEntryCount(self):
@@ -91,16 +96,22 @@ class DatabaseHandler:
     
     
     def DeleteAllEntries(self):
-        self.databaseContent[self.roomId]["entry"] = []
         self.UpdateDatabase("entry", [])
         print("Deleted all entries for Room {roomId}.".format(roomId=self.roomId))
         
         
     def DeleteExpiredEntries(self):
         entries = self.databaseContent[self.roomId]["entry"]
-        current_time = datetime.now()
-        updated_entries = [entry for entry in entries if datetime.strptime(entry["ExitTime"], "%H:%M") > current_time]
-        self.UpdateDatabase("entry", updated_entries)
+        currTime = datetime.now()
+        
+        if entries == []:
+            return
+        
+        for entry in entries:
+            timeDelta = datetime.combine(datetime.today(), datetime.strptime(entry["exitTime"], '%H:%M').time()) - datetime.combine(datetime.today(), datetime.now().time())
+            if timeDelta.seconds <= 0:
+                self.DeleteEntry(entry)
+                
 
         
     def GetDatabaseContent(self):
@@ -142,11 +153,11 @@ class DatabaseHandler:
 
 
 def main():
-    databaseHandler = DatabaseHandler("C127", 7, 10)
+    databaseHandler = DatabaseHandler("C125", 7, 10)
     
-    databaseHandler.Addentry("John123", "10:00", "12:00")
+    databaseHandler.AddEntry("John1232", "22:00", "23:00")
     
-    databaseHandler.Logout()
+    # databaseHandler.Logout()
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from screeninfo import get_monitors
 from time import strftime
-from datetime import datetime
+import datetime
 
 from databaseHandler import *
 
@@ -88,7 +88,7 @@ class Win(tk.Tk):
     def UpdateClock(self):                            # takes the clock on the bottom left and updates it every second
         time = strftime('%H:%M')                      #add %A for weekday name
         self.clock.config(text=time)
-        self.after(1000, self.UpdateClock)
+        self.after(60000, self.UpdateClock)
         
         
         
@@ -169,23 +169,20 @@ class Win(tk.Tk):
             self.einloggBtn.config(state="normal")
             
         # Display current entries
-        entryExitTimes = self.databaseHandler.GetEntryExitTimes()
+        exitTimes = self.databaseHandler.GetExitTimes()
         for i in range(10):
-            if i < len(entryExitTimes):    
-                self.bar[i]["label"].config(text=entryExitTimes[i])
+            if i < len(exitTimes):    
+                self.bar[i]["label"].config(text=exitTimes[i])
                 
-                timeDelta = StrTimeToMinutes(strftime) - StrTimeToMinutes(entryExitTimes[i])
-                self.bar[i]["pb"].config(value=timeDelta)
-            else:
+                timeDelta =  datetime.combine(datetime.today(), datetime.strptime(exitTimes[i], '%H:%M').time()) - datetime.combine(datetime.today(), datetime.now().time())
+                minuteDelta = timeDelta.seconds // 60
+                self.bar[i]["pb"].config(value=minuteDelta)
+            elif i < len(self.bar):
                 self.bar[i]["label"].config(text="")
                 self.bar[i]["pb"].config(value=0)
             
         self.after(60000, self.UpdateDefaultScreen) # update every minute
         
-    
-def StrTimeToMinutes(timeString:str):
-    timeDelta = datetime.strptime(timeString, '%H:%M')
-    return timeDelta.total_seconds() // 60
             
 
 
