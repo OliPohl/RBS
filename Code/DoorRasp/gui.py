@@ -7,6 +7,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from screeninfo import get_monitors
 from time import strftime
+from datetime import datetime
 
 from databaseHandler import *
 
@@ -104,34 +105,89 @@ class Win(tk.Tk):
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
 
         # Titlebar
-        titlePanel = tk.Label(defaultPanel, text="C125 - Leise - 5/7", font=(self.FONT, self.h1Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg="Green", fg="White", highlightbackground="White", highlightthickness=self.borderSize)
-        titlePanel.pack(side="top", fill="x")
+        self.titlePanel = tk.Label(defaultPanel, text="C125 - Leise - 5/7", font=(self.FONT, self.h1Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg="Green", fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        self.titlePanel.pack(side="top", fill="x")
 
         # Display
         displayPanel = tk.Frame(defaultPanel, bg=self.GRAY, highlightbackground="White", highlightthickness=self.borderSize)
         displayPanel.place(relx=0.15, rely=0.165, relwidth=0.7, relheight=0.6)
         
         # Display Current Entries
-        bar = []
+        self.bar = []
         for i in range(10):
             pb = ttk.Progressbar(displayPanel, orient="horizontal", mode="determinate", maximum=90, value=0, style="Horizontal.TProgressbar")
             pb.place(relx=0, rely=i/10, relwidth=1, relheight=0.1)
             pbLabel = tk.Label(pb, text="",  font=(self.FONT, self.h3Size, "bold"), fg="White", bg=self.DARK_CYAN)
             pbLabel.place(relx=0, rely=0.065)
 
-            entryName = "entry" + str(i)
-            entry = {entryName: {"pb": pb, "label": pbLabel}}
-            bar.append(entry)
+            entry = {"pb": pb, "label": pbLabel}
+            self.bar.append(entry)
 
         # Buttons
         btnPanel = tk.Frame(defaultPanel, bg=self.CYAN)
         btnPanel.pack(side="bottom", pady=self.borderSize*10)
 
-        einloggBtn = tk.Button(btnPanel, text="EINLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
-        einloggBtn.pack(side="left", padx=self.borderSize*5)
+        self.einloggBtn = tk.Button(btnPanel, text="EINLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        self.einloggBtn.pack(side="left", padx=self.borderSize*5)
 
         ausloggBtn = tk.Button(btnPanel, text="AUSLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
         ausloggBtn.pack(side="left", padx=self.borderSize*5)
+        
+        # Updates the values with database
+        self.UpdateDefaultScreen()
+        
+        
+        
+    def UpdateDefaultScreen(self):
+        self.databaseHandler.DeleteExpiredEntries()
+        
+        # Update Titlebar Background Color
+        roomState = self.databaseHandler.GetProperty("roomState")
+        if roomState == "Blocked":
+            self.titlePanel.config(bg=self.GRAY)
+            roomSeats = 0
+        elif roomState == "Loud":
+            self.titlePanel.config(bg="Yellow")
+            roomSeats = self.databaseHandler.GetProperty("loudSeats")
+        elif roomState == "Quiet":
+            self.titlePanel.config(bg="Blue")
+            roomSeats = self.databaseHandler.GetProperty("quietSeats")
+        else:
+            self.titlePanel.config(bg="Green")
+            roomSeats = self.databaseHandler.GetProperty("loudSeats")
+            
+        # Update Titlebar Label
+        roomId = self.databaseHandler.GetRoomId()
+        roomCurrSeats = self.databaseHandler.GetEntryCount()
+        
+        self.titlePanel.config(text="{roomId} - {roomState} - {roomCurrSeats}/{roomSeats}".format(roomId=roomId, roomState=roomState, roomCurrSeats=roomCurrSeats, roomSeats=roomSeats))
+        
+        # Disable button if full
+        if roomCurrSeats >= int(roomSeats) or roomState == "Blocked":
+            self.einloggBtn.config(state="disabled")
+        else:
+            self.einloggBtn.config(state="normal")
+            
+        # Display current entries
+        entryExitTimes = self.databaseHandler.GetEntryExitTimes()
+        for i in range(10):
+            if i < len(entryExitTimes):    
+                self.bar[i]["label"].config(text=entryExitTimes[i])
+                
+                timeDelta = StrTimeToMinutes(strftime) - StrTimeToMinutes(entryExitTimes[i])
+                self.bar[i]["pb"].config(value=timeDelta)
+            else:
+                self.bar[i]["label"].config(text="")
+                self.bar[i]["pb"].config(value=0)
+            
+        self.after(60000, self.UpdateDefaultScreen) # update every minute
+        
+    
+def StrTimeToMinutes(timeString:str):
+    timeDelta = datetime.strptime(timeString, '%H:%M')
+    return timeDelta.total_seconds() // 60
+            
+
 
 
 

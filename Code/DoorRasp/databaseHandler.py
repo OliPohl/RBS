@@ -10,7 +10,7 @@ class DatabaseHandler:
             "loudSeats": loudSeats,
             "quietSeats": quietSeats,
             "roomState": "Empty",
-            "Entry": []
+            "entry": []
         }
         
         if not os.path.isfile("localDatabase.txt"):
@@ -50,22 +50,22 @@ class DatabaseHandler:
         
     def AddEntry(self, userId: str, entryTime: str, exitTime: str):
         entry = {
-            "UserId": userId,
-            "EntryTime": entryTime,
-            "ExitTime": exitTime
+            "userId": userId,
+            "entryTime": entryTime,
+            "exitTime": exitTime
         }
-        self.databaseContent[self.roomId]["Entry"].append(entry)
-        self.UpdateDatabase("Entry", self.databaseContent[self.roomId]["Entry"])
-        print("Added entry for User {userId} with Entry Time: {entryTime} and Exit Time: {exitTime}.".format(userId=userId, entryTime=entryTime, exitTime=exitTime))
+        self.databaseContent[self.roomId]["entry"].append(entry)
+        self.UpdateDatabase("entry", self.databaseContent[self.roomId]["entry"])
+        print("Added entry for User {userId} with entry Time: {entryTime} and Exit Time: {exitTime}.".format(userId=userId, entryTime=entryTime, exitTime=exitTime))
         
         
     def DeleteEntry(self, userId: str):
-        entries = self.databaseContent[self.roomId]["Entry"]
-        removed_entries = [entry for entry in entries if entry["UserId"] == userId]
+        entries = self.databaseContent[self.roomId]["entry"]
+        removedEntries = [entry for entry in entries if entry["UserId"] == userId]
         entries[:] = [entry for entry in entries if entry["UserId"] != userId]
-        self.UpdateDatabase("Entry", entries)
+        self.UpdateDatabase("entry", entries)
         
-        if removed_entries:
+        if removedEntries:
             print("Deleted all entries for User {userId}.".format(userId=userId))
             return
         
@@ -73,31 +73,34 @@ class DatabaseHandler:
 
 
     def ScanUserId(self, userId: str):
-        entries = self.databaseContent[self.roomId]["Entry"]
-        user_entries = [entry for entry in entries if entry["UserId"] == userId]
-        if len(user_entries) > 0:
+        entries = self.databaseContent[self.roomId]["entry"]
+        entries = [entry for entry in entries if entry["UserId"] == userId]
+        if len(entries) > 0:
             return True
         return False
     
     
     def GetEntryExitTimes(self):
-        entries = self.databaseContent[self.roomId]["Entry"]
-        entry_exit_times = [(entry["EntryTime"], entry["ExitTime"]) for entry in entries]
-        return entry_exit_times
+        entries = self.databaseContent[self.roomId]["entry"]
+        entryExitTimes = [(entry["entryTime"], entry["ExitTime"]) for entry in entries]
+        return entryExitTimes
+    
+    
+    def GetEntryCount(self):
+        return len(self.databaseContent[self.roomId]["entry"])
     
     
     def DeleteAllEntries(self):
-        self.databaseContent[self.roomId]["Entry"] = []
-        self.UpdateDatabase("Entry", [])
+        self.databaseContent[self.roomId]["entry"] = []
+        self.UpdateDatabase("entry", [])
         print("Deleted all entries for Room {roomId}.".format(roomId=self.roomId))
         
         
     def DeleteExpiredEntries(self):
-        entries = self.databaseContent[self.roomId]["Entry"]
+        entries = self.databaseContent[self.roomId]["entry"]
         current_time = datetime.now()
         updated_entries = [entry for entry in entries if datetime.strptime(entry["ExitTime"], "%H:%M") > current_time]
-        self.UpdateDatabase("Entry", updated_entries)
-        print("Deleted expired entries for Room {roomId}.".format(roomId=self.roomId))
+        self.UpdateDatabase("entry", updated_entries)
 
         
     def GetDatabaseContent(self):
@@ -120,7 +123,11 @@ class DatabaseHandler:
         
     def GetProperty(self, property: str):
         self.databaseContent = self.GetDatabaseContent()
-        return self.databaseContent.get(property)
+        return self.databaseContent.get(self.roomId, {}).get(property)
+    
+    
+    def GetRoomId(self):
+        return self.roomId
         
         
     def SetProperty(self, property: str, value):
@@ -137,7 +144,7 @@ class DatabaseHandler:
 def main():
     databaseHandler = DatabaseHandler("C127", 7, 10)
     
-    databaseHandler.AddEntry("John123", "10:00", "12:00")
+    databaseHandler.Addentry("John123", "10:00", "12:00")
     
     databaseHandler.Logout()
 
