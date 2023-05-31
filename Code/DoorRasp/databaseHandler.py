@@ -49,18 +49,21 @@ class DatabaseHandler:
         
         
     def AddEntry(self, userId: str, startTime: str, exitTime: str):
+        entries = self.GetProperty("entry")
+        
         entry = {
             "userId": userId,
             "entryTime": startTime,
             "exitTime": exitTime
         }
-        self.databaseContent[self.roomId]["entry"].append(entry)
-        self.UpdateDatabase("entry", self.databaseContent[self.roomId]["entry"])
+        
+        entries.append(entry)
+        self.UpdateDatabase("entry", entries)
         print("Added Entry for User {userId} with Entry Time: {startTime} and Exit Time: {exitTime}.".format(userId=userId, startTime=startTime, exitTime=exitTime))
         
         
     def DeleteEntry(self, userId: str):
-        entries = self.databaseContent[self.roomId]["entry"]
+        entries = self.GetProperty("entry")
         
         if entries == []:
             return
@@ -74,17 +77,24 @@ class DatabaseHandler:
 
 
     def ScanUserId(self, userId: str):
-        entries = self.databaseContent[self.roomId]["entry"]
-        if entries != []:
-            for entry in entries:
-                if entry["UserId"] == userId:
-                    return True
+        entries = self.GetProperty("entry")
+        
+        if entries == []:
+           return False
+        
+        for entry in entries:
+            if entry["UserId"] == userId:
+                return True
         return False
 
     
     
     def GetExitTimes(self):
-        entries = self.databaseContent[self.roomId]["entry"]
+        entries = self.GetProperty("entry")
+        
+        if entries == []:
+           return []
+       
         exitTimes = []
         for entry in entries:
             exitTimes.append(entry["exitTime"])
@@ -92,7 +102,8 @@ class DatabaseHandler:
     
     
     def GetEntryCount(self):
-        return len(self.databaseContent[self.roomId]["entry"])
+        entries = self.GetProperty("entry")
+        return len(entries)
     
     
     def DeleteAllEntries(self):
@@ -101,8 +112,7 @@ class DatabaseHandler:
         
         
     def DeleteExpiredEntries(self):
-        entries = self.databaseContent[self.roomId]["entry"]
-        currTime = datetime.now()
+        entries = self.GetProperty("entry")
         
         if entries == []:
             return
@@ -110,7 +120,7 @@ class DatabaseHandler:
         for entry in entries:
             timeDelta = datetime.combine(datetime.today(), datetime.strptime(entry["exitTime"], '%H:%M').time()) - datetime.combine(datetime.today(), datetime.now().time())
             if timeDelta.seconds <= 0:
-                self.DeleteEntry(entry)
+                self.DeleteEntry(entry["userId"])
                 
 
         
