@@ -58,8 +58,13 @@ class Win(tk.Tk):
         # Log into Database
         self.databaseHandler = DatabaseHandler("C125", 6, 10)
         
-        # start with default screen
+        # Loadup Screens
+        self.Background()
         self.DefaultScreen()
+        
+        
+        # Start with the Default Screen
+        self.SelectDefaultFrame()
         
         
         
@@ -93,15 +98,15 @@ class Win(tk.Tk):
         
         
     def DefaultScreen(self):
-        # Update background
-        self.Background()
+        # Defualt Frame
+        self.defautlFrame = tk.Frame(self.canvas)
         
         # Settings Button
-        settingsBtn = tk.Button(self.canvas, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        settingsBtn = tk.Button(self.defautlFrame, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
         settingsBtn.place(relx=0.01, rely=0.02)
         
         # Default Panel
-        defaultPanel = tk.Frame(self.canvas, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
+        defaultPanel = tk.Frame(self.defautlFrame, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
         defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
 
         # Titlebar
@@ -127,10 +132,10 @@ class Win(tk.Tk):
         btnPanel = tk.Frame(defaultPanel, bg=self.CYAN)
         btnPanel.pack(side="bottom", pady=self.borderSize*10)
 
-        self.einloggBtn = tk.Button(btnPanel, text="EINLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        self.einloggBtn = tk.Button(btnPanel, text="EINLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
         self.einloggBtn.pack(side="left", padx=self.borderSize*5)
 
-        ausloggBtn = tk.Button(btnPanel, text="AUSLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid")
+        ausloggBtn = tk.Button(btnPanel, text="AUSLOGGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
         ausloggBtn.pack(side="left", padx=self.borderSize*5)
         
         # Updates the values with database
@@ -182,6 +187,19 @@ class Win(tk.Tk):
                 self.bar[i]["pb"].config(value=0)
             
         self.after(60000, self.UpdateDefaultScreen) # update every minute
+        
+    
+    def DeselectAllFrames(self):
+        self.defautlFrame.forget()
+        
+        
+    def SelectDefaultFrame(self):
+        self.DeselectAllFrames()
+        self.defautlFrame.pack(fill=tk.BOTH, expand=True)
+        
+        
+    def SelectIdFrame(self, args:int):
+        self.DeselectAllFrames()
         
             
 
