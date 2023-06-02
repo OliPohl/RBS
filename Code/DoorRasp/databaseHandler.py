@@ -113,8 +113,7 @@ class DatabaseHandler:
         
     def DeleteExpiredEntries(self):
         entries = self.GetProperty("entry")
-        
-        print("Entries in DeleteExpiredEntries(): " + str(entries))
+
         if entries == []:
             return
         
