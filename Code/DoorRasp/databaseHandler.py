@@ -72,7 +72,7 @@ class DatabaseHandler:
         for entry in entries:
             if entry["userId"] != userId:
                 updatedEntries.append(entry)
-                
+        
         self.UpdateDatabase("entry", updatedEntries)
 
 
@@ -114,12 +114,14 @@ class DatabaseHandler:
     def DeleteExpiredEntries(self):
         entries = self.GetProperty("entry")
         
+        print("Entries in DeleteExpiredEntries(): " + str(entries))
         if entries == []:
             return
         
         for entry in entries:
             timeDelta = datetime.combine(datetime.today(), datetime.strptime(entry["exitTime"], '%H:%M').time()) - datetime.combine(datetime.today(), datetime.now().time())
-            if timeDelta.seconds <= 0:
+            minuteDelta = timeDelta.seconds // 60
+            if minuteDelta <= 0 or minuteDelta > 100:
                 self.DeleteEntry(entry["userId"])
                 
 
@@ -165,9 +167,9 @@ class DatabaseHandler:
 def main():
     databaseHandler = DatabaseHandler("C125", 7, 10)
     
-    databaseHandler.AddEntry("John1232", "22:00", "23:00")
+    databaseHandler.AddEntry("John1232", "15:00", "15:24")
     
-    # databaseHandler.Logout()
+    databaseHandler.Logout()
 
 
 if __name__ == "__main__":
