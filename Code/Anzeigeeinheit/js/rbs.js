@@ -7,35 +7,38 @@ var rooms = new Array;
 /* Jeder Eintrag (Entry) ist eine Buchung */
 class Entry {
   constructor() {
-    this.id = new String(); // Hochschulausweis-ID
-    this.startTime = new Date(); // Zeitpunkt der Buchung
-    this.endTime = new Date(); // Zeitpunkt, zudem die Buchung automatisch aufhören soll; wird aus der Länge der Buchung errechnet (das ist aber noch nicht implementiert)
+    this.userId = new String(); // Hochschulausweis-ID
+    this.entryTime = new Date(); // Zeitpunkt der Buchung
+    this.exitTime = new Date(); // Zeitpunkt, zudem die Buchung automatisch aufhören soll; wird aus der Länge der Buchung errechnet (das ist aber noch nicht implementiert)
   }
 
   remainingTime() { // gibt an, wie lange eine Buchung noch dauert (in Minuten)
     // aktuell wird die Dauer zwischen Startzeitpunkt und Endzeitpunkt ausgegeben; für die spätere Anwendung sollte die Dauer zwischen aktuellem Zeitpunkt und Endzeitpunkt ausgegeben werden
-    return Math.round((Date.parse(this.endTime) - Date.parse(this.startTime)) / 60000);
+    return Math.round((Date.parse(this.exitTime) - Date.parse(this.entryTime)) / 60000);
   }
 }
 
 class Room {
-  constructor(id,size,x,y) {
+  constructor(id,isActive,loudSeats,quietSeats,size,x,y) {
     this.id = id;
+    this.isActive = isActive;
+    this.loudSeats = loudSeats;
+    this.quietSeats = quietSeats;
     this.size = size;
     this.x = x; // X-Koordinate auf der Karte; angegeben in CSS-Einheiten
     this.y = y; // Y-Koordinate auf der Karte; angegeben in CSS-Einheiten
 
-    this.state = "empty"; // Status des Raums (empty, full, quiet, loud)
-    this.entries = new Array(size);
+    this.roomState = "empty"; // Status des Raums (empty, full, quiet, loud)
+    this.entry = new Array(size);
     for (let i = 0; i < size; i++) {
-      this.entries[i] = new Entry();
+      this.entry[i] = new Entry;
     }
   }
 
   occupation() { // gibt an, wie voll ein Raum ist
     let result = 0;
     for (let i = 0; i < this.size; i++) {
-      if (this.entries[i].id != "") {
+      if (this.entry[i].userId != "") {
         result++;
       }
     }
@@ -55,25 +58,36 @@ async function getData() {
   let roomsJSON = await response.json();
 
   for (let i = 0; i < roomsJSON.rooms.length; i++) {
-    rooms.push(new Room(roomsJSON.rooms[i].id,roomsJSON.rooms[i].size,roomsJSON.rooms[i].x,roomsJSON.rooms[i].y));
+    rooms.push(new Room(
+      roomsJSON.rooms[i].id,
+      roomsJSON.rooms[i].isActive,
+      roomsJSON.rooms[i].loudSeats,
+      roomsJSON.rooms[i].quietSeats,
+      roomsJSON.rooms[i].entry.length,
+      roomsJSON.rooms[i].x,
+      roomsJSON.rooms[i].y
+    ));
   }
 }
 
-async function updateData() {
+async function updateData() { //wenn neue Räume hinzugefügt werden, muss die Seite aktualisiert werden
   let request = new Request(dataURL);
   let response = await fetch(request);
   let roomsJSON = await response.json();
 
   for (let i = 0; i < roomsJSON.rooms.length; i++) {
-    rooms[i].state = roomsJSON.rooms[i].state;
+    rooms[i].roomState = roomsJSON.rooms[i].roomState;
+    rooms[i].size = roomsJSON.rooms[i].entry.length;
+    rooms[i].entry = new Array(rooms[i].size);
     for (let j = 0; j < rooms[i].size; j++) {
-      rooms[i].entries[j].id = roomsJSON.rooms[i].entries[j].id;
-      if (rooms[i].entries[j].id != "") {
-        rooms[i].entries[j].startTime = roomsJSON.rooms[i].entries[j].startTime;
-        rooms[i].entries[j].endTime = roomsJSON.rooms[i].entries[j].endTime;
+      rooms[i].entry[j] = new Entry;
+      rooms[i].entry[j].userId = roomsJSON.rooms[i].entry[j].userId;
+      if (rooms[i].entry[j].userId != "") {
+        rooms[i].entry[j].entryTime = roomsJSON.rooms[i].entry[j].entryTime;
+        rooms[i].entry[j].exitTime = roomsJSON.rooms[i].entry[j].exitTime;
       } else {
-        rooms[i].entries[j].startTime = new Date();
-        rooms[i].entries[j].endTime = new Date();
+        rooms[i].entry[j].entryTime = new Date();
+        rooms[i].entry[j].exitTime = new Date();
       }
     }
   }
@@ -83,46 +97,85 @@ async function buildHTML() {
   await getData();
   let wrapper = document.querySelector(".wrapper");
   let htmlElement = new String();
-  let j = new Number();
   for (let i = 0; i < rooms.length; i++) {
-    htmlElement = '<div class="room ' + rooms[i].state + '" id="' + rooms[i].id + '" style="left: ' + rooms[i].x + '; top: ' + rooms[i].y + '"><h3>' + rooms[i].id + ' (0 von ' + rooms[i].size + ' Plätzen belegt)</h3>';
-    for (j = 0; j < rooms[i].size; j++) {
-      htmlElement += '<div class="bar" remainingTime="' + standardValueTime + '" style="width: calc((' + 0 + ' / ' + maxTime + ') * 100%)"></div>';
+    if (rooms[i].isActive == "True") {
+      htmlElement = '<div class="room ' + rooms[i].roomState + '" id="' + rooms[i].id + '" style="left: ' + rooms[i].x + '; top: ' + rooms[i].y + '"><h3>' + rooms[i].id + '</h3>';
+      for (let j = 0; j < Math.max(rooms[i].loudSeats,rooms[i].quietSeats); j++) {
+        htmlElement += '<div class="bar" remainingTime="' + standardValueTime + '" style="width: calc((' + 0 + ' / ' + maxTime + ') * 100%)"></div>';
+      }
+      htmlElement += '</div>';
+      wrapper.innerHTML += htmlElement;
     }
-    htmlElement += '</div>';
-    wrapper.innerHTML += htmlElement;
   }
 }
 
 function updateRoom(room = new Room()) {
   let htmlroom = document.getElementById(room.id);
-  htmlroom.classList.replace(htmlroom.classList[1], room.state); //Raumstatus wird geupdatet
-  htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.size + ' Plätzen belegt)'; //Anzahl der belegten Plätze auf der Anzeige wird geupdatet
+  htmlroom.classList.replace(htmlroom.classList[1], room.roomState); //Raumstatus wird geupdatet
+  switch (room.roomState) { //Anzahl der belegten Plätze auf der Anzeige wird geupdatet
+    case "loud": {
+      htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.loudSeats + ' Plätzen belegt)';
+      break;
+    }
+    case "quiet": {
+      htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.quietSeats + ' Plätzen belegt)';
+      break;
+    }
+    case "full": {
+      htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.occupation() + ' Plätzen belegt)';
+      break;
+    }
+    default: {
+      htmlroom.querySelector("h3").innerHTML = room.id;
+      break;
+    }
+  }
   let bars = htmlroom.querySelectorAll(".bar"); //die einzelnen Balken der Einträge werden geupdatet
   //Zeiten sollen im Objekt nach Länge geordnet werden
   let timeDif = new Number();
-  for (let i = 0; i < bars.length; i++) {
-    timeDif = room.entries[i].remainingTime();
-    bars[i].setAttribute('remainingTime', timeDif + ' min'); //Zeit wird geupdatet
-    bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+  for (let i = 0; i < room.entry.length; i++) {
+    timeDif = room.entry[i].remainingTime();
+    if (timeDif >= 0) { //einfach nur um Fehler vorzubeugen (z.B. Rundungsfehler)
+      bars[i].setAttribute('remainingTime', timeDif + ' min'); //Zeit wird geupdatet
+      bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+    } else {
+      bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
+      bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+    }
+  }
+  for (let i = room.entry.length; i < bars.length; i++) {
+    bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
+    bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
   }
 }
 
 function updateBarsLength(room = new Room()) { // bisher ungenutzt; aber gute Möglichkeit um benötigte Rechenpower runterzukriegen, wenn es einen Changelog gibt
-  let testTime = 3; //hier muss noch eine ordentliche Formel hin
   let htmlroom = document.getElementById(room.id);
   let bars = htmlroom.querySelectorAll(".bar"); //die einzelnen Balken der Einträge werden geupdatet
   //Zeiten sollen im Objekt nach Länge geordnet werden
-  for (let i = 0; i < bars.length; i++) {
-    bars[i].setAttribute('remainingTime', testTime + ' min'); //Zeit wird geupdatet
-    bars[i].setAttribute('style', 'width: calc((' + testTime + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+  let timeDif = new Number();
+  for (let i = 0; i < room.entry.length; i++) {
+    timeDif = room.entry[i].remainingTime();
+    if (timeDif >= 0) { //einfach nur um Fehler vorzubeugen (z.B. Rundungsfehler)
+      bars[i].setAttribute('remainingTime', timeDif + ' min'); //Zeit wird geupdatet
+      bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+    } else {
+      bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
+      bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+    }
+  }
+  for (let i = room.entry.length; i < bars.length; i++) {
+    bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
+    bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
   }
 }
 
 async function updateHTML() {
   await updateData();
   for (let i = 0; i < rooms.length; i++) {
-    updateRoom(rooms[i]);
+    if (rooms[i].isActive == "True") {
+      updateRoom(rooms[i]);
+    }
   }
 }
 
