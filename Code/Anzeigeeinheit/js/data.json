@@ -1,0 +1,57 @@
+{
+  "rooms": [
+    {
+      "id": "A226",
+      "isActive": "True",
+      "loudSeats": 3,
+      "quietSeats": 2,
+      "x": "0",
+      "y": "0",
+      "roomState": "quiet",
+      "entry": [
+        {
+          "userId": "John1233332",
+          "entryTime": "2011-10-10T13:48",
+          "exitTime": "2011-10-10T14:35"
+        }
+      ]
+    },
+    {
+      "id": "C125",
+      "isActive": "True",
+      "loudSeats": 4,
+      "quietSeats": 3,
+      "x": "50%",
+      "y": "25%",
+      "roomState": "loud",
+      "entry": [
+        {
+          "userId": "John1233332",
+          "entryTime": "2011-10-10T14:48",
+          "exitTime": "2011-10-10T15:53"
+        },
+        {
+          "userId": "John1233332",
+          "entryTime": "2011-10-10T14:48",
+          "exitTime": "2011-10-10T14:53"
+        }
+      ]
+    },
+    {
+      "id": "F125",
+      "isActive": "True",
+      "loudSeats": 1,
+      "quietSeats": 1,
+      "x": "25%",
+      "y": "60%",
+      "roomState": "full",
+      "entry": [
+        {
+          "userId": "John1233332",
+          "entryTime": "2011-10-10T14:48",
+          "exitTime": "2011-10-10T17:53"
+        }
+      ]
+    }
+  ]
+}
