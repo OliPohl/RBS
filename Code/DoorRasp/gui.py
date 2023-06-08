@@ -41,7 +41,7 @@ class Win(tk.Tk):
         self.borderSize = round(self.screenWidth / 512)
         
         self.h1Size = round(self.screenWidth / 50)
-        self.h1Size = round(self.screenWidth / 75)
+        self.h2Size = round(self.screenWidth / 75)
         self.h3Size = round(self.screenWidth / 100)
         
         self.btn1Size = round(self.screenWidth / 70)
