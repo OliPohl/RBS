@@ -62,7 +62,7 @@ class Win(tk.Tk):
         self.databaseHandler = DatabaseHandler("C125", 6, 10)
         
         # Loadup Screens
-        # self.Background()
+        self.Background()
         self.DefaultScreen()
         self.IdScreen()
         self.EntryScreen()
@@ -71,13 +71,16 @@ class Win(tk.Tk):
         
         
         # Start with the Default Screen
-        self.SelectMessageFrame()
+        self.bgFrame.pack(fill=tk.BOTH, expand=True)
+        self.SelectDefaultFrame()
         
         
         
     def Background(self):
+        # Defualt Frame
+        self.bgFrame = tk.Frame(self)
         # Loading in Background Image       
-        self.canvas = tk.Canvas(self, bg='SkyBlue4')        
+        self.canvas = tk.Canvas(self.bgFrame, bg='SkyBlue4')        
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
         bgImg = Image.open("Assets\Background2.png")
@@ -109,12 +112,12 @@ class Win(tk.Tk):
         self.defautlFrame = tk.Frame(self)
         
         # Settings Button
-        settingsBtn = tk.Button(self.defautlFrame, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
-        settingsBtn.place(relx=0.01, rely=0.02)
+        # settingsBtn = tk.Button(self.defautlFrame, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
+        # settingsBtn.place(relx=0.01, rely=0.02)
         
         # Default Panel
         defaultPanel = tk.Frame(self.defautlFrame, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
-        defaultPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
+        defaultPanel.pack(fill=tk.BOTH, expand=True)
 
         # Titlebar
         self.titlePanel = tk.Label(defaultPanel, text="C125 - Leise - 5/7", font=(self.FONT, self.h1Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg="Green", fg="White", highlightbackground="White", highlightthickness=self.borderSize)
@@ -156,7 +159,7 @@ class Win(tk.Tk):
         
         # Panel
         idPanel = tk.Frame(self.idFrame, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
-        idPanel.place(relx=0.375, rely=0.2, relwidth=0.25, relheight=0.6)
+        idPanel.pack(fill=tk.BOTH, expand=True)
         
         # Titlebar
         titlePanel = tk.Label(idPanel, text="Hochschul-ID auflegen!", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg=self.DARK_CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
@@ -169,7 +172,7 @@ class Win(tk.Tk):
         
         idImgPanel = tk.Label(self.idFrame, image=idImg, background=self.CYAN)
         idImgPanel.image = idImg
-        idImgPanel.place(x=(self.screenWidth-self.panelSize)/2, y=(self.screenHeight-self.panelSize)/2)
+        idImgPanel.place(relx=0.05, rely=0.225, relwidth=0.9)
         
         
         
@@ -179,7 +182,7 @@ class Win(tk.Tk):
         
         # Entry Panel
         entryPanel = tk.Frame(self.entryFrame, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
-        entryPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
+        entryPanel.pack(fill=tk.BOTH, expand=True)
 
         # Titlebar
         titlePanel = tk.Label(entryPanel, text="Einloggen", font=(self.FONT, self.h1Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg=self.DARK_CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
@@ -265,7 +268,7 @@ class Win(tk.Tk):
         
         # Entry Panel
         settingsPanel = tk.Frame(self.settingsFrame, bg=self.CYAN, highlightbackground="White", highlightthickness=self.borderSize)
-        settingsPanel.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
+        settingsPanel.pack(fill=tk.BOTH, expand=True)
 
         # Titlebar
         titlePanel = tk.Label(settingsPanel, text="Settings", font=(self.FONT, self.h1Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg=self.DARK_CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
@@ -390,7 +393,7 @@ class Win(tk.Tk):
         
         # Message Panel
         messagePanel = tk.Frame(self.messageFrame, bg=self.DARK_CYAN, highlightbackground="White", highlightthickness=self.borderSize)
-        messagePanel.place(relx=0.25, rely=0.375, relwidth=0.5, relheight=0.25)
+        messagePanel.pack(fill=tk.BOTH, expand=True)
 
         # Titlebar
         titlePanel = tk.Label(messagePanel, text="Erfolgreich eingeloggt. Bitte loggen Sie sich wieder aus, wenn Sie den Raum verlassen.", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg=self.DARK_CYAN, fg="White", justify="center")
@@ -450,34 +453,34 @@ class Win(tk.Tk):
         
     
     def DeselectAllFrames(self):
-        self.defautlFrame.forget()
-        self.idFrame.forget()
-        self.entryFrame.forget()
-        self.settingsFrame.forget()
-        self.messageFrame.forget()
+        self.defautlFrame.place_forget()
+        self.idFrame.place_forget()
+        self.entryFrame.place_forget()
+        self.settingsFrame.place_forget()
+        self.messageFrame.place_forget()
         
         
     def SelectDefaultFrame(self):
         self.DeselectAllFrames()
-        self.defautlFrame.pack(fill=tk.BOTH, expand=True)
+        self.defautlFrame.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
         
         
     def SelectIdFrame(self, route:int):
         self.DeselectAllFrames()
-        self.idFrame.pack(fill=tk.BOTH, expand=True)
+        self.idFrame.place(relx=0.375, rely=0.2, relwidth=0.25, relheight=0.6)
         self.LookForId(route)
         
     def SelectEntryFrame(self):
         self.DeselectAllFrames()
-        self.entryFrame.pack(fill=tk.BOTH, expand=True)
+        self.entryFrame.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
         
     def SelectSettingsFrame(self):
         self.DeselectAllFrames()
-        self.settingsFrame.pack(fill=tk.BOTH, expand=True)
+        self.settingsFrame.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
         
     def SelectMessageFrame(self):
         self.DeselectAllFrames()
-        self.messageFrame.pack(fill=tk.BOTH, expand=True)
+        self.messageFrame.place(relx=0.25, rely=0.375, relwidth=0.5, relheight=0.25)
 
 
 
