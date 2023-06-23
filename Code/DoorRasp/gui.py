@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import threading
 
 import tkinter as tk
 from tkinter import ttk
@@ -7,9 +8,11 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from screeninfo import get_monitors
 from time import strftime
-import datetime
+from time import time
+from datetime import datetime, timedelta
 
 from databaseHandler import *
+from rfidReader import *
 
 
 class Win(tk.Tk):
@@ -21,9 +24,15 @@ class Win(tk.Tk):
     
     # Static fonts and colors for later use
     FONT = "Arial"
+    
     GRAY = "#a6a7a9"
+    DARK_GRAY = "#4f4f4f"
     CYAN = "#58b8c6"
     DARK_CYAN = "#2b5f67"
+    
+    YELLOW = "#b9a21c"
+    GREEN = "#36AE7C"
+    BLUE = "#187498"
     
     def __init__(self):
         tk.Tk.__init__(self, None)
@@ -67,6 +76,9 @@ class Win(tk.Tk):
         # logging into Database
         self.databaseHandler = DatabaseHandler("C125", 6, 10)
         
+        # Initialize RFID Reader
+        self.rfidReader = RfidReader()
+        
         # Preloading Screens so they can be called later on
         self.Background()
         self.DefaultScreen()
@@ -106,22 +118,26 @@ class Win(tk.Tk):
     def SelectIdFrame(self, route:int):             # Shows the ID Screen. Also saves the route (from with screen the user came from)
         self.DeselectAllFrames()
         self.idFrame.place(relx=0.375, rely=0.2, relwidth=0.25, relheight=0.6)
-        self.LookForId(route)
+        self.StartScanIdThread()
+        self.ScanId(route)
         
         
     def SelectEntryFrame(self):                     # Shows the Default Screen
         self.DeselectAllFrames()
         self.entryFrame.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
+        self.InitializeEntryScreen()
         
         
     def SelectSettingsFrame(self):                  # Shows the Settings Screen
         self.DeselectAllFrames()
         self.settingsFrame.place(relx=0.25, rely=0.15, relwidth=0.5, relheight=0.7)
+        self.InitializeSettingsScreen()
         
         
-    def SelectMessageFrame(self):                   # Shows the Message Screen
+    def SelectMessageFrame(self, route: int):                   # Shows the Message Screen
         self.DeselectAllFrames()
         self.messageFrame.place(relx=0.25, rely=0.375, relwidth=0.5, relheight=0.25)
+        self.UpdateMessageScreen(route)
         
         
         
@@ -204,7 +220,7 @@ class Win(tk.Tk):
         logoutBtn.pack(side="left", padx=self.borderSize*5)
         
         # Updates the values with database every minute
-        self.UpdateDefaultScreen()
+        self.UpdateDefaultScreen(True)
         
         
     def SettingsWheel(self):
@@ -215,35 +231,42 @@ class Win(tk.Tk):
         settingsBtn.pack(fill=tk.BOTH, expand=True)
         
         
-    def UpdateDefaultScreen(self):
+    def UpdateDefaultScreen(self, repeat: bool):
         self.databaseHandler.DeleteExpiredEntries()
         
         # Update Titlebar Background Color
-        roomState = self.databaseHandler.GetProperty("roomState")
-        if roomState == "Blocked":
-            self.defaultTitle.config(bg=self.GRAY)
+        self.roomState = self.databaseHandler.GetProperty("roomState")
+        if self.roomState == "Blocked":
+            self.defaultTitle.config(bg=self.DARK_GRAY)
+            currRoomState = "Blockiert"
             roomSeats = 0
-        elif roomState == "Loud":
-            self.defaultTitle.config(bg="Yellow")
+        elif self.roomState == "Loud":
+            self.defaultTitle.config(bg=self.YELLOW)
+            currRoomState = "Laut"
             roomSeats = self.databaseHandler.GetProperty("loudSeats")
-        elif roomState == "Quiet":
-            self.defaultTitle.config(bg="Blue")
+        elif self.roomState == "Quiet":
+            self.defaultTitle.config(bg=self.BLUE)
+            currRoomState = "Leise"
             roomSeats = self.databaseHandler.GetProperty("quietSeats")
         else:
-            self.defaultTitle.config(bg="Green")
+            self.defaultTitle.config(bg=self.GREEN)
+            currRoomState = "Lehr"
             roomSeats = self.databaseHandler.GetProperty("loudSeats")
             
         # Update Titlebar Label
         roomId = self.databaseHandler.GetRoomId()
         roomCurrSeats = self.databaseHandler.GetEntryCount()
         
-        self.defaultTitle.config(text="{roomId} - {roomState} - {roomCurrSeats}/{roomSeats}".format(roomId=roomId, roomState=roomState, roomCurrSeats=roomCurrSeats, roomSeats=roomSeats))
+        self.defaultTitle.config(text="{roomId} - {roomState} - {roomCurrSeats}/{roomSeats}".format(roomId=roomId, roomState=currRoomState, roomCurrSeats=roomCurrSeats, roomSeats=roomSeats))
         
         # Disable button if full
-        if roomCurrSeats >= int(roomSeats) or roomState == "Blocked":
+        if roomCurrSeats >= int(roomSeats) or self.roomState == "Blocked":
             self.loginBtn.config(state="disabled")
         else:
             self.loginBtn.config(state="normal")
+            
+        if roomCurrSeats == 0:
+            self.databaseHandler.SetProperty("roomState", "Empty")
             
         # Display current entries
         exitTimes = self.databaseHandler.GetExitTimes()
@@ -257,9 +280,12 @@ class Win(tk.Tk):
             elif i < len(self.bar):
                 self.bar[i]["label"].config(text="")
                 self.bar[i]["pb"].config(value=0)
-            
-        self.after(60000, self.UpdateDefaultScreen) # update every minute
         
+        if repeat != True:
+            return
+        
+        self.after(60000, self.UpdateDefaultScreen) # update every minute
+                
         
         
     #########################
@@ -287,6 +313,48 @@ class Win(tk.Tk):
         idImgPanel.image = idImg
         idImgPanel.place(relx=0.05, rely=0.225, relwidth=0.9)
         
+        
+    def StartScanIdThread(self):
+        # Starting a thread to read id parallel to showing the screen
+        self.thread = threading.Thread(target=self.rfidReader.ReadId)
+        self.thread.daemon = True 
+        self.thread.start()
+        
+        
+    def ScanId(self, route: int):
+        if self.rfidReader.userId != None:
+            self.userId = self.rfidReader.userId
+            
+            # Checking if the user id was valid
+            if self.userId == "0":
+                self.SelectMessageFrame(0)          # Timeout
+                return
+            
+            isUser = self.databaseHandler.ScanUserId(self.userId)
+
+            # Checking which window this request came from and routing accordingly
+            match route:
+                case 0:
+                    if(self.rfidReader.GotPermission(self.userId)):
+                        self.SelectSettingsFrame()
+                        return
+                    self.SelectMessageFrame(6)          # Permission Denied
+                case 1:
+                    if isUser == True:
+                        self.SelectMessageFrame(1)          # User Id already logged in
+                        return
+                    self.SelectEntryFrame()
+                case 2:
+                    if isUser:
+                        self.databaseHandler.DeleteEntry(self.userId)
+                        self.UpdateDefaultScreen(False)
+                        self.SelectMessageFrame(3)                      # Sucessfully Logged out
+                    else:
+                        self.SelectMessageFrame(8)                      # If user is not logged in
+            return
+        
+        self.after(1000, lambda: self.ScanId(route))
+            
         
         
     #########################
@@ -316,14 +384,14 @@ class Win(tk.Tk):
         rightRoomTypePanel.place(relx=0.35, rely=0, relwidth=0.65, relheight=1)
         
         # Heading that is placed left to the buttons
-        roomTypeHeading = tk.Label(leftRoomTypePanel, text="Lernart", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        roomTypeHeading = tk.Label(leftRoomTypePanel, text="Lernart", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         roomTypeHeading.pack(side="left", fill="x", padx=self.borderSize*5)
         
         # Buttons to either choose a loud room or quiet room
-        self.loudBtn = tk.Button(rightRoomTypePanel, text="Loud", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.loudBtn = tk.Button(rightRoomTypePanel, text="Laut", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryRoomState(self.loudBtn, "Loud"))
         self.loudBtn.pack(side="left", padx=self.borderSize*5, anchor="center")
 
-        self.quietBtn = tk.Button(rightRoomTypePanel, text="Quiet", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        self.quietBtn = tk.Button(rightRoomTypePanel, text="Leise", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryRoomState(self.quietBtn, "Quiet"))
         self.quietBtn.pack(side="left", padx=self.borderSize*5, anchor="center")
         
         
@@ -341,28 +409,28 @@ class Win(tk.Tk):
         rightBotDurationPanel.place(relx=0.35, rely=0.5, relwidth=0.65, relheight=0.5)
         
         # Heading that is placed left to the buttons
-        durationHeading = tk.Label(leftDurationPanel, text="Lerndauer", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        durationHeading = tk.Label(leftDurationPanel, text="Lerndauer", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         durationHeading.pack(side="left", fill="x", padx=self.borderSize*5)
         
         # Buttons to choose how long the user expect to be in the room
             # top row
-        self.t15Btn = tk.Button(rightTopDurationPanel, text="15 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.t15Btn = tk.Button(rightTopDurationPanel, text="15 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryDuration(self.t15Btn, 15))
         self.t15Btn.pack(side="left", padx=self.borderSize*5, anchor="center")
 
-        self.t30Btn = tk.Button(rightTopDurationPanel, text="30 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        self.t30Btn = tk.Button(rightTopDurationPanel, text="30 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryDuration(self.t30Btn, 30))
         self.t30Btn.pack(side="left", padx=self.borderSize*5, anchor="center")
         
-        self.t45Btn = tk.Button(rightTopDurationPanel, text="45 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.t45Btn = tk.Button(rightTopDurationPanel, text="45 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryDuration(self.t45Btn, 45))
         self.t45Btn.pack(side="left", padx=self.borderSize*5, anchor="center")
         
             # bottom row
-        self.t60Btn = tk.Button(rightBotDurationPanel, text="60 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.t60Btn = tk.Button(rightBotDurationPanel, text="60 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryDuration(self.t60Btn, 60))
         self.t60Btn.pack(side="left", padx=self.borderSize*5, anchor="center")
 
-        self.t75Btn = tk.Button(rightBotDurationPanel, text="75 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        self.t75Btn = tk.Button(rightBotDurationPanel, text="75 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryDuration(self.t75Btn, 75))
         self.t75Btn.pack(side="left", padx=self.borderSize*5, anchor="center")
         
-        self.t90Btn = tk.Button(rightBotDurationPanel, text="90 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.t90Btn = tk.Button(rightBotDurationPanel, text="90 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateEntryDuration(self.t90Btn, 90))
         self.t90Btn.pack(side="left", padx=self.borderSize*5, anchor="center")
         
         
@@ -370,12 +438,71 @@ class Win(tk.Tk):
         btnPanel = tk.Frame(mainPanel, bg=self.CYAN)
         btnPanel.pack(side="bottom", pady=self.borderSize*10)
 
-        self.entryConfirmBtn = tk.Button(btnPanel, text="BESTÄTIGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
-        self.entryConfirmBtn.pack(side="left", padx=self.borderSize*5)
+        entryConfirmBtn = tk.Button(btnPanel, text="BESTÄTIGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.LoginEntry())
+        entryConfirmBtn.pack(side="left", padx=self.borderSize*5)
 
-        denyBtn = tk.Button(btnPanel, text="ABBRECHEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        denyBtn = tk.Button(btnPanel, text="ABBRECHEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectMessageFrame(4))
         denyBtn.pack(side="left", padx=self.borderSize*5)
         
+    
+    def InitializeEntryScreen(self):
+        # Reset old state
+        self.EnableAllEntryStateBtns()
+        self.EnableAllEntryDurationBtns()
+    
+        # Checking if the current room state is not empty. If not preselecting quiet learning
+        self.quietBtn.config(state="disabled")
+        if self.roomState != "Empty":
+            self.loudBtn.config(state="disabled")
+            self.newRoomState = self.roomState
+        else:
+            self.loudBtn.config(state="normal")
+            self.newRoomState = "Quiet"
+            
+        # Preselecting 15 minutes
+        self.t15Btn.config(state="disabled")
+        self.duration = 15
+        
+    
+    def UpdateEntryDuration(self, btn: tk.Button, value: int):
+        self.EnableAllEntryDurationBtns()
+        btn.config(state="disabled")
+        self.duration = value
+        
+    
+    def EnableAllEntryDurationBtns(self):
+        self.t15Btn.config(state="normal")
+        self.t30Btn.config(state="normal")
+        self.t45Btn.config(state="normal")
+        self.t60Btn.config(state="normal")
+        self.t75Btn.config(state="normal")
+        self.t90Btn.config(state="normal")
+        
+    
+    def UpdateEntryRoomState(self, btn: tk.Button, value:str):
+        self.EnableAllEntryStateBtns()
+        
+        self.newRoomState = value
+        btn.config(state="disabled")
+        
+        
+    def EnableAllEntryStateBtns(self):
+        self.loudBtn.config(state="normal")
+        self.quietBtn.config(state="normal")
+        
+        
+    def LoginEntry(self):
+        exitTime = datetime.now().time()
+        exitTime = datetime.combine(datetime.today(), exitTime)
+        exitTime = exitTime + timedelta(minutes=self.duration)
+        exitTime = exitTime.time().strftime("%H:%M")
+
+        self.databaseHandler.AddEntry(self.userId, datetime.now().time().strftime("%H:%M"), exitTime)
+        self.databaseHandler.SetProperty("roomState", self.newRoomState)
+        
+        self.SelectMessageFrame(2)
+        self.UpdateDefaultScreen(False)
+
         
         
     #########################
@@ -405,18 +532,18 @@ class Win(tk.Tk):
         rightLoudMaxPanel.place(relx=0.45, rely=0, relwidth=0.55, relheight=1)
 
         # Heading that is placed left to the buttons and current capacity of loud seats next to it
-        loudMaxHeading = tk.Label(leftLoudMaxPanel, text="Laute Plätze", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        loudMaxHeading = tk.Label(leftLoudMaxPanel, text="Laute Plätze", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         loudMaxHeading.pack(side="left", fill="x", padx=self.borderSize*5)
 
-        self.currLoudMaxLabel = tk.Label(rightLoudMaxPanel, text="8", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*10, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        self.currLoudMaxLabel = tk.Label(rightLoudMaxPanel, text="8", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*10, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         self.currLoudMaxLabel.pack(side="left", padx=[self.borderSize*2.5, self.borderSize*15], anchor="center")
         
         # Buttons to add and subtract from the current loud seat capacity
-        self.addLoudMaxBtn = tk.Button(rightLoudMaxPanel, text="+", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
-        self.addLoudMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
+        addLoudMaxBtn = tk.Button(rightLoudMaxPanel, text="+", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateLoudMaxSettings(1))
+        addLoudMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
 
-        self.retractLoudMaxBtn = tk.Button(rightLoudMaxPanel, text="-", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
-        self.retractLoudMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
+        retractLoudMaxBtn = tk.Button(rightLoudMaxPanel, text="-", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateLoudMaxSettings(-1))
+        retractLoudMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
         
         
         # Creating and Dividing a panel with buttons to change the maximum of quiet seats in the room
@@ -430,18 +557,18 @@ class Win(tk.Tk):
         rightQuietMaxPanel.place(relx=0.45, rely=0, relwidth=0.55, relheight=1)
 
         # Heading that is placed left to the buttons and current capacity of quiet seats next to it
-        quietMaxHeading = tk.Label(leftQuietMaxPanel, text="Leise Plätze", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        quietMaxHeading = tk.Label(leftQuietMaxPanel, text="Leise Plätze", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         quietMaxHeading.pack(side="left", fill="x", padx=self.borderSize*5)
 
-        self.currQuietMaxLabel = tk.Label(rightQuietMaxPanel, text="2", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*10, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        self.currQuietMaxLabel = tk.Label(rightQuietMaxPanel, text="2", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*10, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         self.currQuietMaxLabel.pack(side="left", padx=[self.borderSize*2.5, self.borderSize*15], anchor="center")
         
         # Buttons to add and subtract from the current quiet seat capacity
-        self.addQuietMaxBtn = tk.Button(rightQuietMaxPanel, text="+", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
-        self.addQuietMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
+        addQuietMaxBtn = tk.Button(rightQuietMaxPanel, text="+", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateQuietMaxSettings(1))
+        addQuietMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
 
-        self.redactQuietMaxBtn = tk.Button(rightQuietMaxPanel, text="-", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
-        self.redactQuietMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
+        redactQuietMaxBtn = tk.Button(rightQuietMaxPanel, text="-", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateQuietMaxSettings(-1))
+        redactQuietMaxBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
         
         
         # Creating and Dividing a panel with buttons to block the room for admin use
@@ -455,17 +582,17 @@ class Win(tk.Tk):
         rightBlockPanel.place(relx=0.45, rely=0, relwidth=0.55, relheight=1)
 
         # Heading that is placed left to the buttons
-        blockHeading = tk.Label(leftBlockPanel, text="Raum blockieren", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        blockHeading = tk.Label(leftBlockPanel, text="Raum blockieren", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         blockHeading.pack(side="left", fill="x", padx=self.borderSize*5)
 
         # Buttons that let the user choose how much time he wants to block the room from ther usage      
-        self.t30BlockBtn = tk.Button(rightBlockPanel, text="30 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 2.5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.t30BlockBtn = tk.Button(rightBlockPanel, text="30 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 2.5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateSettingsDuration(self.t30BlockBtn, 30))
         self.t30BlockBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
 
-        self.t60BlockBtn = tk.Button(rightBlockPanel, text="60 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 2.5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        self.t60BlockBtn = tk.Button(rightBlockPanel, text="60 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 2.5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateSettingsDuration(self.t60BlockBtn, 60))
         self.t60BlockBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
         
-        self.t90BlockBtn = tk.Button(rightBlockPanel, text="90 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 2.5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        self.t90BlockBtn = tk.Button(rightBlockPanel, text="90 min", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 2.5), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateSettingsDuration(self.t90BlockBtn, 90))
         self.t90BlockBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
         
         
@@ -480,14 +607,14 @@ class Win(tk.Tk):
         rightShutdownPanel.place(relx=0.45, rely=0, relwidth=0.55, relheight=1)
 
         # Heading that is placed left to the buttons
-        shutdownHeading = tk.Label(leftShutdownPanel, text="Herunterfahren", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.CYAN, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
+        shutdownHeading = tk.Label(leftShutdownPanel, text="Herunterfahren", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize*15, pady=self.borderSize, bg=self.DARK_GRAY, fg="White", highlightbackground="White", highlightthickness=self.borderSize)
         shutdownHeading.pack(side="left", fill="x", padx=self.borderSize*5)
 
         # Buttons that let the user choose if They want to shutdown the system
-        self.yShutdownBtn = tk.Button(rightShutdownPanel, text="Ja", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
+        self.yShutdownBtn = tk.Button(rightShutdownPanel, text="Ja", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateShutdownBtn(self.yShutdownBtn, True))
         self.yShutdownBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
 
-        self.nShutdownBtn = tk.Button(rightShutdownPanel, text="Nein", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        self.nShutdownBtn = tk.Button(rightShutdownPanel, text="Nein", font=(self.FONT, self.btn2Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.UpdateShutdownBtn(self.nShutdownBtn, False))
         self.nShutdownBtn.pack(side="left", padx=self.borderSize*2.5, anchor="center")
         
         
@@ -495,17 +622,97 @@ class Win(tk.Tk):
         btnPanel = tk.Frame(mainPanel, bg=self.CYAN)
         btnPanel.pack(side="bottom", pady=self.borderSize*10)
 
-        self.settingsConfirmBtn = tk.Button(btnPanel, text="BESTÄTIGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(1))
-        self.settingsConfirmBtn.pack(side="left", padx=self.borderSize*5)
+        settingsConfirmBtn = tk.Button(btnPanel, text="BESTÄTIGEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.ConfirmSettings())
+        settingsConfirmBtn.pack(side="left", padx=self.borderSize*5)
 
-        denyBtn = tk.Button(btnPanel, text="ABBRECHEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(2))
+        denyBtn = tk.Button(btnPanel, text="ABBRECHEN", font=(self.FONT, self.btn1Size, "bold"), padx=(self.borderSize * 10), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectMessageFrame(4))
         denyBtn.pack(side="left", padx=self.borderSize*5)
         
         
+    def InitializeSettingsScreen(self):
+        # Reset old state
+        self.EnableSettingsShutdownBtns()
+        self.EnableSettingsDurationBtns()
+        self.blockDuration = 0
+        
+        # Setting Label in loud and quiet max seats
+        self.currLoudMax = self.databaseHandler.GetProperty("loudSeats")
+        self.currQuietMax = self.databaseHandler.GetProperty("quietSeats")
+        self.currLoudMaxLabel.config(text=str(self.currLoudMax))
+        self.currQuietMaxLabel.config(text=str( self.currQuietMax))
+        
+        # Setting Shutdown to No
+        self.nShutdownBtn.config(state="disabled")
+        self.shutdown = False
+        
+    
+    def UpdateLoudMaxSettings(self, value: int):
+        self.currLoudMax += value
+        self.currLoudMaxLabel.config(text=str(self.currLoudMax))
+        
+        
+    def UpdateQuietMaxSettings(self, value: int):
+        self.currQuietMax += value
+        self.currQuietMaxLabel.config(text=str(self.currQuietMax))
+        
+    
+    def UpdateSettingsDuration(self, btn: tk.Button, value: int):
+        self.EnableSettingsDurationBtns()
+        btn.config(state="disabled")
+        self.blockDuration = value
+        
+    
+    def EnableSettingsDurationBtns(self):
+        self.t30BlockBtn.config(state="normal")
+        self.t60BlockBtn.config(state="normal")
+        self.t90BlockBtn.config(state="normal")
+        
+        
+    def UpdateShutdownBtn(self, btn: tk.Button, value: bool):
+        self.EnableSettingsShutdownBtns()
+        
+        btn.config(state="disabled")
+        self.shutdown = value
+        
+        
+    def EnableSettingsShutdownBtns(self):
+        self.yShutdownBtn.config(state="normal")
+        self.nShutdownBtn.config(state="normal")
+        
+    
+    def ConfirmSettings(self):
+        if self.shutdown:
+            self.databaseHandler.Logout()
+            self.destroy()
+            return
+        
+        # Set loud and quiet seats
+        self.databaseHandler.SetProperty("loudSeats", str(self.currLoudMax))
+        self.databaseHandler.SetProperty("quietSeats", str(self.currQuietMax))
+        
+        # Check if the user wants to block the room. If yes delete all entries, and add an entry from said user
+        if self.blockDuration > 0:
+            self.databaseHandler.SetProperty("roomState", "Blocked")
+            self.databaseHandler.DeleteAllEntries()
+            
+            # add entry from user who blocked the room
+            exitTime = datetime.now().time()
+            exitTime = datetime.combine(datetime.today(), exitTime)
+            exitTime = exitTime + timedelta(minutes=self.blockDuration)
+            exitTime = exitTime.time().strftime("%H:%M")
+
+            self.databaseHandler.AddEntry(self.userId, datetime.now().time().strftime("%H:%M"), exitTime)
+            self.SelectMessageFrame(10)
+        else:
+            self.SelectMessageFrame(9)
+            
+        self.UpdateDefaultScreen(False)
+
+    
     
     #########################
     #                       #
-    #    Settings Screen    #
+    #     Message Screen    #
     #                       #
     #########################
         
@@ -514,10 +721,39 @@ class Win(tk.Tk):
         mainPanel = tk.Frame(self.messageFrame, bg=self.DARK_CYAN, highlightbackground="White", highlightthickness=self.borderSize)
         mainPanel.pack(fill=tk.BOTH, expand=True)
 
-        # Displaying Titlebar in the main Panel
-        title = tk.Label(mainPanel, text="Erfolgreich eingeloggt. Bitte loggen Sie sich wieder aus, wenn Sie den Raum verlassen.", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg=self.DARK_CYAN, fg="White", justify="center")
-        title.bind('<Configure>', lambda e: title.config(wraplength=title.winfo_width()*0.9))
-        title.place(relx=0, rely=0, relwidth=1, relheight=1)
+        # Displaying Message
+        self.message = tk.Label(mainPanel, text="Erfolgreich eingeloggt. Bitte loggen Sie sich wieder aus, wenn Sie den Raum verlassen.", font=(self.FONT, self.h2Size, "bold"), padx=self.borderSize, pady=self.borderSize, bg=self.DARK_CYAN, fg="White", justify="center")
+        self.message.bind('<Configure>', lambda e: self.message.config(wraplength=self.message.winfo_width()*0.9))
+        self.message.place(relx=0, rely=0, relwidth=1, relheight=1)
+        
+    
+    def UpdateMessageScreen(self, route: int):
+        match route:
+            case 0:
+                self.message.config(text="Die vorgegebene Zeit für den ID-Scan ist abgelaufen, und es wurde keine Hochschul-ID erkannt.")
+            case 1:
+                self.message.config(text="Sie sind bereits in diesem Raum eingeloggt und können daher keine erneute Buchung vornehmen.")
+            case 2:
+                self.message.config(text="Erfolgreich eingeloggt. Bitte loggen Sie sich wieder aus, wenn Sie den Raum verlassen.")
+            case 3:
+                self.message.config(text="Erfolgreich ausgeloggt.")
+            case 4:
+                self.message.config(text="Vorgang wurde abgebrochen.")
+            case 5:
+                self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
+            case 6:
+                self.message.config(text="Sie haben keine Berechtigung um diese Tür zu verwalten.")
+            case 7:
+                self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
+            case 8:
+                self.message.config(text="Sie sind nicht in diesem Raum eingeloggt.")
+            case 9:
+                self.message.config(text="Tür eigenschaften erfolgreich verändert.")
+            case 10:
+                self.message.config(text="Raum erfolgreich blockiert.")
+                
+        # Wait 3 seconds and then go back to the default screen
+        self.after(3000, lambda: self.SelectDefaultFrame())
 
 
 

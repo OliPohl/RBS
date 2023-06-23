@@ -83,7 +83,7 @@ class DatabaseHandler:
            return False
         
         for entry in entries:
-            if entry["UserId"] == userId:
+            if entry["userId"] == userId:
                 return True
         return False
 
