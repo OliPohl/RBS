@@ -333,24 +333,23 @@ class Win(tk.Tk):
             isUser = self.databaseHandler.ScanUserId(self.userId)
 
             # Checking which window this request came from and routing accordingly
-            match route:
-                case 0:
-                    if(self.rfidManager.CheckPermission(self.userId)):
-                        self.SelectSettingsFrame()
-                        return
-                    self.SelectMessageFrame(6)          # Permission Denied
-                case 1:
-                    if isUser == True:
-                        self.SelectMessageFrame(1)          # User Id already logged in
-                        return
-                    self.SelectEntryFrame()
-                case 2:
-                    if isUser:
-                        self.databaseHandler.DeleteEntry(self.userId)
-                        self.UpdateDefaultScreen(False)
-                        self.SelectMessageFrame(3)                      # Sucessfully Logged out
-                    else:
-                        self.SelectMessageFrame(8)                      # If user is not logged in
+            if route == 0:
+                if(self.rfidManager.CheckPermission(self.userId)):
+                    self.SelectSettingsFrame()
+                    return
+                self.SelectMessageFrame(6)          # Permission Denied
+            elif route == 1:
+                if isUser == True:
+                    self.SelectMessageFrame(1)          # User Id already logged in
+                    return
+                self.SelectEntryFrame()
+            elif route == 2:
+                if isUser:
+                    self.databaseHandler.DeleteEntry(self.userId)
+                    self.UpdateDefaultScreen(False)
+                    self.SelectMessageFrame(3)                      # Sucessfully Logged out
+                else:
+                    self.SelectMessageFrame(8)                      # If user is not logged in
             return
         
         self.after(1000, lambda: self.ScanId(route))
@@ -728,29 +727,28 @@ class Win(tk.Tk):
         
     
     def UpdateMessageScreen(self, route: int):
-        match route:
-            case 0:
-                self.message.config(text="Die vorgegebene Zeit für den ID-Scan ist abgelaufen, und es wurde keine Hochschul-ID erkannt.")
-            case 1:
-                self.message.config(text="Sie sind bereits in diesem Raum eingeloggt und können daher keine erneute Buchung vornehmen.")
-            case 2:
-                self.message.config(text="Erfolgreich eingeloggt. Bitte loggen Sie sich wieder aus, wenn Sie den Raum verlassen.")
-            case 3:
-                self.message.config(text="Erfolgreich ausgeloggt.")
-            case 4:
-                self.message.config(text="Vorgang wurde abgebrochen.")
-            case 5:
-                self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
-            case 6:
-                self.message.config(text="Sie haben keine Berechtigung um diese Tür zu verwalten.")
-            case 7:
-                self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
-            case 8:
-                self.message.config(text="Sie sind nicht in diesem Raum eingeloggt.")
-            case 9:
-                self.message.config(text="Tür eigenschaften erfolgreich verändert.")
-            case 10:
-                self.message.config(text="Raum erfolgreich blockiert.")
+        if route == 0:
+            self.message.config(text="Die vorgegebene Zeit für den ID-Scan ist abgelaufen, und es wurde keine Hochschul-ID erkannt.")
+        elif route == 1:
+            self.message.config(text="Sie sind bereits in diesem Raum eingeloggt und können daher keine erneute Buchung vornehmen.")
+        elif route == 2:
+            self.message.config(text="Erfolgreich eingeloggt. Bitte loggen Sie sich wieder aus, wenn Sie den Raum verlassen.")
+        elif route == 3:
+            self.message.config(text="Erfolgreich ausgeloggt.")
+        elif route == 4:
+            self.message.config(text="Vorgang wurde abgebrochen.")
+        elif route == 5:
+            self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
+        elif route == 6:
+            self.message.config(text="Sie haben keine Berechtigung um diese Tür zu verwalten.")
+        elif route == 7:
+            self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
+        elif route == 8:
+            self.message.config(text="Sie sind nicht in diesem Raum eingeloggt.")
+        elif route == 9:
+            self.message.config(text="Tür eigenschaften erfolgreich verändert.")
+        elif route == 10:
+            self.message.config(text="Raum erfolgreich blockiert.")
                 
         # Wait 3 seconds and then go back to the default screen
         self.after(3000, lambda: self.SelectDefaultFrame())
