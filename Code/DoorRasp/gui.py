@@ -638,8 +638,8 @@ class Win(tk.Tk):
         # Setting Label in loud and quiet max seats
         self.currLoudMax = self.databaseHandler.GetProperty("loudSeats")
         self.currQuietMax = self.databaseHandler.GetProperty("quietSeats")
-        self.currLoudMaxLabel.config(text=str(self.currLoudMax))
-        self.currQuietMaxLabel.config(text=str( self.currQuietMax))
+        self.currLoudMaxLabel.config(text=self.currLoudMax)
+        self.currQuietMaxLabel.config(text=self.currQuietMax)
         
         # Setting Shutdown to No
         self.nShutdownBtn.config(state="disabled")
@@ -648,12 +648,12 @@ class Win(tk.Tk):
     
     def UpdateLoudMaxSettings(self, value: int):
         self.currLoudMax += value
-        self.currLoudMaxLabel.config(text=str(self.currLoudMax))
+        self.currLoudMaxLabel.config(text=self.currLoudMax)
         
         
     def UpdateQuietMaxSettings(self, value: int):
         self.currQuietMax += value
-        self.currQuietMaxLabel.config(text=str(self.currQuietMax))
+        self.currQuietMaxLabel.config(text=self.currQuietMax)
         
     
     def UpdateSettingsDuration(self, btn: tk.Button, value: int):
@@ -687,8 +687,8 @@ class Win(tk.Tk):
             return
         
         # Set loud and quiet seats
-        self.databaseHandler.SetProperty("loudSeats", str(self.currLoudMax))
-        self.databaseHandler.SetProperty("quietSeats", str(self.currQuietMax))
+        self.databaseHandler.SetProperty("loudSeats", self.currLoudMax)
+        self.databaseHandler.SetProperty("quietSeats", self.currQuietMax)
         
         # Check if the user wants to block the room. If yes delete all entries, and add an entry from said user
         if self.blockDuration > 0:
