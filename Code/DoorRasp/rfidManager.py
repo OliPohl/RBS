@@ -16,10 +16,10 @@ class RfidManager:
         self.rfid = SimpleMFRC522()
 
 
-    def ScanId(self, timer:int):
+    def ScanId(self):
         self.userId = None
 
-        timeEnd = time.time() + timer
+        timeEnd = time.time() + 5
         
         while time.time() < timeEnd:
             if self.isWindows:
@@ -80,7 +80,7 @@ class RfidManager:
 
 def main():
     rfidManager = RfidManager()
-    rfidManager.ScanId(5)
+    rfidManager.ScanId()
     
     if rfidManager.userId == 0:
         print("User Id not found.")

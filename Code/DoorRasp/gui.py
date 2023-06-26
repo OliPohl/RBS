@@ -12,7 +12,7 @@ from time import time
 from datetime import datetime, timedelta
 
 from databaseHandler import *
-from rfidReader import *
+from rfidManager import *
 
 
 class Win(tk.Tk):
@@ -77,7 +77,7 @@ class Win(tk.Tk):
         self.databaseHandler = DatabaseHandler("C125", 6, 10)
         
         # Initialize RFID Reader
-        self.rfidReader = RfidReader()
+        self.rfidManager = RfidManager()
         
         # Preloading Screens so they can be called later on
         self.Background()
@@ -316,13 +316,13 @@ class Win(tk.Tk):
         
     def StartScanIdThread(self):
         # Starting a thread to read id parallel to showing the screen
-        self.thread = threading.Thread(target=self.rfidReader.ReadId)
+        self.thread = threading.Thread(target=self.rfidManager.ScanId)
         self.thread.daemon = True 
         self.thread.start()
         
         
     def ScanId(self, route: int):
-        if self.rfidReader.userId != None:
+        if self.rfidManager.userId != None:
             self.userId = self.rfidReader.userId
             
             # Checking if the user id was valid
@@ -335,7 +335,7 @@ class Win(tk.Tk):
             # Checking which window this request came from and routing accordingly
             match route:
                 case 0:
-                    if(self.rfidReader.GotPermission(self.userId)):
+                    if(self.rfidManager.CheckPermission(self.userId)):
                         self.SelectSettingsFrame()
                         return
                     self.SelectMessageFrame(6)          # Permission Denied
