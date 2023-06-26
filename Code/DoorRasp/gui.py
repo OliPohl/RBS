@@ -154,7 +154,7 @@ class Win(tk.Tk):
         self.canvas = tk.Canvas(self.bgFrame, bg='SkyBlue4')        
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
-        bgImg = Image.open("Assets\Background.png")
+        bgImg = Image.open("Background.png")
         bgImg = bgImg.resize((self.screenWidth, self.screenHeight), Image.LANCZOS)
         bgImg = ImageTk.PhotoImage(bgImg)
         
@@ -304,7 +304,7 @@ class Win(tk.Tk):
         title.pack(side="top", fill="x")
         
         # Loading in the Image that shows the user where to put the id card
-        idImg = Image.open("Assets\idImg.png")
+        idImg = Image.open("idImg.png")
         idImg = idImg.resize((self.panelSize, self.panelSize), Image.LANCZOS)
         idImg = ImageTk.PhotoImage(idImg)
         
