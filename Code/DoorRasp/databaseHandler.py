@@ -36,27 +36,6 @@ class DatabaseHandler:
         newvalues = { "$set": self.roomProperties }
         self.mycol.update_one(self.roomId_query, newvalues, upsert=True)
 
-#         if not os.path.isfile("localDatabase.txt"):
-#             open("localDatabase.txt", "x")
-#         self.database = open("localDatabase.txt", "r+")
-        
-#         # Check if Room exists in the database      
-#         self.databaseContent = self.GetDatabaseContent()
-
-#         if self.databaseContent.get(self.roomId, {}).get("isActive"):
-#             print("### Exception: {roomId} is currently active. Room data is being overwritten to ensure consistency. If you encounter any issues, please verify that there are no other rooms logged in with the same ID.".format(roomId=self.roomId))
-        
-#         # Logging into room
-#         for entry in self.roomProperties:
-#             self.databaseContent = self.UpdateDatabase(entry, self.roomProperties[entry])
-        
-#         # Check for Information mismatch
-#         for entry in self.roomProperties:
-#             if self.databaseContent.get(self.roomId, {}).get(entry) != self.roomProperties[entry]:
-#                 raise Exception("Room data mismatch for {roomId}. Please ensure that the RaspberryPi is connected to the database and there are no conflicting room properties.".format(roomId=self.roomId))
-                
-#         print("Successfully logged into Database:\n---\nRoom ID: {roomId}\nLoud Seats: {loudSeats}\nQuiet Seats: {quietSeats}\nRoom State: {roomState}\n---".format(roomId=self.roomId, loudSeats=self.databaseContent[self.roomId]["loudSeats"], quietSeats=self.databaseContent[self.roomId]["quietSeats"], roomState=self.databaseContent[self.roomId]["roomState"]))
-
 
 
     def Logout(self):
@@ -130,34 +109,9 @@ class DatabaseHandler:
             exitTime = results[x][2]
             if datetime.now() >= exitTime:
                 self.DeleteEntry(results[x][0])
-#         for entry in entries:
-#             timeDelta = datetime.combine(datetime.today(), datetime.strptime(entry["exitTime"], '%H:%M').time()) - datetime.combine(datetime.today(), datetime.now().time())
-#             minuteDelta = timeDelta.seconds // 60
-#             if minuteDelta <= 0 or minuteDelta > 100:
-#                 self.DeleteEntry(entry["userId"])
-                
-
-        
-#     def GetDatabaseContent(self):
-#         self.database.seek(0)
-#         databaseString = self.database.read()
-#         if databaseString:
-#             return eval(databaseString)
-#         else:
-#             return {}
-        
-        
-#     def UpdateDatabase(self, property: str, value):
-#         self.databaseContent = self.GetDatabaseContent()
-#         self.databaseContent.setdefault(self.roomId, {}).update({property: value})
-#         self.database.seek(0)
-#         self.database.write(str(self.databaseContent))
-#         self.database.truncate()
-#         return self.GetDatabaseContent()
 
         
     def GetProperty(self, property: str):
-        #self.databaseContent = self.GetDatabaseContent()
         property += ": 1, _id: 0"
         return self.mycol.find_one(self.roomId_query, {property})
     
@@ -169,12 +123,6 @@ class DatabaseHandler:
     def SetProperty(self, property: str, value):
         newValues = { "$set": {property: value}}
         self.mycol.update_one(self.roomId_query, newValues)
-#         self.databaseContent = self.UpdateDatabase(property, value)
-#         if self.databaseContent.get(self.roomId, {}).get(property) == value:
-#             print("Successfully changed {property} to {value} roomstate for room {roomId}.".format(roomId=self.roomId, property=property, value=self.databaseContent[self.roomId][property]))
-#             return
-#         else:
-#             print("Failed to change property for room {roomId}.".format(roomId=self.roomId))
 
 
 
