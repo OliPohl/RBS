@@ -1,0 +1,239 @@
+html, body, div, span, applet, object,
+iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
+pre, a, abbr, acronym, address, big, cite,
+code, del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var, b,
+u, i, center, dl, dt, dd, ol, ul, li, fieldset,
+form, label, legend, table, caption, tbody,
+tfoot, thead, tr, th, td, article, aside,
+canvas, details, embed, figure, figcaption,
+footer, header, hgroup, menu, nav, output, ruby,
+section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: middle;
+}
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+
+html {
+	font-size: 1vh;
+	font-size: 1svh;
+	font-family: Arial, sans-serif;
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* Edge */
+	overflow: hidden;
+
+	--gray: #a6a7a9;
+	--dark-gray: #4f4f4f;
+	--cyan: #58b8c6;
+	--dark-cyan: #2b5f67;
+	--white: #fff;
+	--black: #000;
+
+	--yellow: #b9a21c;
+	--green: #36AE7C;
+	--blue: #187498;
+	--red: #f00;
+}
+
+body {
+	background-color: var(--dark-cyan);
+	color: var(--white);
+	font-weight: bold;
+	overflow: hidden;
+	text-align: center;
+}
+
+body::before,
+body::after {
+	content: '';
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	display: block;
+	height: 20vh;
+	height: 20svh;
+	width: 25%;
+	position: absolute;
+}
+
+body::before {
+	right: 0;
+	top: 0;
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon%20points%3D'0%2C0%20100%2C0%20100%2C100'%20fill%3D'%2358b8c6'%20%2F%3E%3Cline%20x1%3D'0'%20y1%3D'0'%20x2%3D'100'%20y2%3D'100'%20stroke%3D'%23fff'%20stroke-width%3D'.1rem'%20%2F%3E%3C/svg%3E");
+	z-index: 1;
+}
+
+body::after {
+	left: 0;
+	bottom: 0;
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon%20points%3D'0%2C100%200%2C0%20100%2C100'%20fill%3D'%2358b8c6'%20%2F%3E%3Cline%20x1%3D'0'%20y1%3D'0'%20x2%3D'100'%20y2%3D'100'%20stroke%3D'%23fff'%20stroke-width%3D'.1rem'%20%2F%3E%3C/svg%3E");
+}
+
+main {
+	aspect-ratio: 2 / 1;
+	height: 100vh;
+	height: 100svh;
+	margin: auto;
+	position: relative;
+}
+
+.wrapper {
+	aspect-ratio: 2 / 1;
+	height: 80vh;
+	height: 80svh;
+	margin: 7.5vh auto;
+	margin: 7.5svh auto;
+	position: relative;
+	overflow: hidden;
+
+	background-image: url(images/campus.svg);
+}
+
+.room {
+	width: 16.5rem;
+	position: absolute;
+	padding-bottom: 1rem;
+	border: .3rem solid var(--white);
+
+	background-color: var(--cyan);
+	z-index: 0;
+}
+
+h3 {
+	padding: .5rem 0;
+	border-bottom: .3rem solid var(--white);
+	line-height: 1rem;
+}
+
+.empty {
+	padding-bottom: 0;
+}
+
+.empty h3 {
+	border-bottom: 0;
+}
+
+.legend .empty,
+.empty h3 {
+	background-color: var(--green);
+}
+
+.legend .full,
+.full h3 {
+	background-color: var(--red);
+}
+
+.legend .quiet,
+.quiet h3 {
+	background-color: var(--blue);
+}
+
+.legend .loud,
+.loud h3 {
+	background-color: var(--yellow);
+}
+
+/* aktuell ungenutzt */
+.prof h3 {
+	background-color: #0008;
+}
+
+.bar {
+	height: 1rem;
+	margin: .3rem .9rem 0;
+	padding: 0.25rem 0;
+	background-color: var(--dark-cyan);
+
+	z-index: 1;
+}
+
+.bar:first-of-type {
+	margin-top: 1rem;
+}
+
+.bar:first-of-type::before {
+	content: '';
+	width: calc(100% - 1.7rem);
+	height: calc(100% - 3.7rem);
+	position: absolute;
+	left: .6rem;
+	top: 2.7rem;
+	background-color: var(--gray);
+	border: .3rem solid var(--white);
+
+	z-index: -1;
+}
+
+.bar::after {
+	content: attr(remainingTime) " min";
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	min-width: 7ch;
+}
+
+.bar[remainingTime="0"] {
+	display: none;
+}
+
+.legend {
+	z-index: 5;
+	position: relative;
+	bottom: 4.8vh;
+	bottom: 4.8svh;
+	padding: .4vh;
+	padding: .4svh;
+	margin: auto;
+	width: 38.2%;
+	font-size: 3vh;
+	font-size: 3svh;
+	line-height: 3vh;
+	line-height: 3svh;
+	text-align: right;
+
+	border: .4vh solid var(--white);
+	border: .4svh solid var(--white);
+	background-color: var(--cyan);
+}
+
+.legend::before {
+	content: "Legende:";
+	padding: 1.4vh;
+	padding: 1.4svh;
+	position: absolute;
+	left: 0;
+}
+
+.legend * {
+	display: inline-block;
+	z-index: 9999;
+	padding: 1vh;
+	padding: 1svh;
+	margin-left: 1vh;
+	margin-left: 1svh;
+	border: .4vh solid var(--white);
+	border: .4svh solid var(--white);
+}
+
+.legend *:first-of-type {
+	margin-left: 0;
+}
+
+img.logo {
+	position: absolute;
+	z-index: 1;
+	bottom: 1vh;
+	bottom: 1svh;
+	left: 1vh;
+	left: 1svh;
+	height: 8vh;
+	height: 8svh;
+	max-width: 12.5%;
+}

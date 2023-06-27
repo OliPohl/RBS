@@ -1,5 +1,5 @@
 const maxTime = 240; // Anzeige auf die nächsten 4 Stunden begrenzt => Begrenzung der maximalen Buchungslänge auf 4 Stunden?
-const standardValueTime = '0 min'; // wird als Startwert für das Attribut remainingTime verwendet => sollte sich die Konstante im Javascript ändern, muss auch das CSS angepasst werden
+const standardValueTime = '0'; // wird als Startwert für das Attribut remainingTime verwendet => sollte sich die Konstante im Javascript ändern, muss auch das CSS angepasst werden
 const dataURL = "js/data.json"; // JSON-Datei mit den Daten
 var rooms = new Array;
 
@@ -90,6 +90,12 @@ async function updateData() { //wenn neue Räume hinzugefügt werden, muss die S
         rooms[i].entry[j].exitTime = new Date();
       }
     }
+    if (((rooms[i].roomState == "quiet") && (rooms[i].occupation() == rooms[i].quietSeats)) || ((rooms[i].roomState == "loud") && (rooms[i].occupation() == rooms[i].loudSeats))) {
+      rooms[i].roomState = "full";
+    }
+    if ((rooms[i].occupation() == 0) && (rooms[i].roomState != "empty")) { // nur zur Sicherheit; eigentlich (wenn alles funktioniert bei der Tür, der Datenbank und der Verbindung) sollte dieser Fall nicht eintreten
+      rooms[i].roomState = "empty";
+    }
   }
 }
 
@@ -101,7 +107,7 @@ async function buildHTML() {
     if (rooms[i].isActive == "True") {
       htmlElement = '<div class="room ' + rooms[i].roomState + '" id="' + rooms[i].id + '" style="left: ' + rooms[i].x + '; top: ' + rooms[i].y + '"><h3>' + rooms[i].id + '</h3>';
       for (let j = 0; j < Math.max(rooms[i].loudSeats,rooms[i].quietSeats); j++) {
-        htmlElement += '<div class="bar" remainingTime="' + standardValueTime + '" style="width: calc((' + 0 + ' / ' + maxTime + ') * 100%)"></div>';
+        htmlElement += '<div class="bar" remainingTime="' + standardValueTime + '" style="width: 0"></div>';
       }
       htmlElement += '</div>';
       wrapper.innerHTML += htmlElement;
@@ -136,16 +142,16 @@ function updateRoom(room = new Room()) {
   for (let i = 0; i < room.entry.length; i++) {
     timeDif = room.entry[i].remainingTime();
     if (timeDif >= 0) { //einfach nur um Fehler vorzubeugen (z.B. Rundungsfehler)
-      bars[i].setAttribute('remainingTime', timeDif + ' min'); //Zeit wird geupdatet
-      bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+      bars[i].setAttribute('remainingTime', timeDif); //Zeit wird geupdatet
+      bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * (100% - 2rem))'); //Balkenlänge wird geupdatet
     } else {
       bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
-      bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+      bars[i].setAttribute('style', 'width: 0'); //Balkenlänge wird geupdatet
     }
   }
   for (let i = room.entry.length; i < bars.length; i++) {
     bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
-    bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+    bars[i].setAttribute('style', 'width: 0'); //Balkenlänge wird geupdatet
   }
 }
 
@@ -157,16 +163,16 @@ function updateBarsLength(room = new Room()) { // bisher ungenutzt; aber gute M�
   for (let i = 0; i < room.entry.length; i++) {
     timeDif = room.entry[i].remainingTime();
     if (timeDif >= 0) { //einfach nur um Fehler vorzubeugen (z.B. Rundungsfehler)
-      bars[i].setAttribute('remainingTime', timeDif + ' min'); //Zeit wird geupdatet
-      bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+      bars[i].setAttribute('remainingTime', timeDif); //Zeit wird geupdatet
+      bars[i].setAttribute('style', 'width: calc((' + timeDif + ' / ' + maxTime + ') * (100% - 2rem))'); //Balkenlänge wird geupdatet
     } else {
       bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
-      bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+      bars[i].setAttribute('style', 'width: 0'); //Balkenlänge wird geupdatet
     }
   }
   for (let i = room.entry.length; i < bars.length; i++) {
     bars[i].setAttribute('remainingTime', standardValueTime); //Zeit wird geupdatet
-    bars[i].setAttribute('style', 'width: calc((' + 0 + ' / ' + maxTime + ') * 100%)'); //Balkenlänge wird geupdatet
+    bars[i].setAttribute('style', 'width: 0'); //Balkenlänge wird geupdatet
   }
 }
 
