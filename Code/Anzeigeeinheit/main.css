@@ -41,6 +41,14 @@ html {
 	--green: #36AE7C;
 	--blue: #187498;
 	--red: #f00;
+
+	--aspect-ratio: 2/1;
+}
+
+@media (max-aspect-ratio: 2/1) { /* hier funktionieren Variablen leider nicht */
+	html {
+		font-size: .5vw;
+	}
 }
 
 body {
@@ -49,6 +57,8 @@ body {
 	font-weight: bold;
 	overflow: hidden;
 	text-align: center;
+	min-height: 100vh;
+	min-height: 100svh;
 }
 
 body::before,
@@ -76,18 +86,10 @@ body::after {
 	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon%20points%3D'0%2C100%200%2C0%20100%2C100'%20fill%3D'%2358b8c6'%20%2F%3E%3Cline%20x1%3D'0'%20y1%3D'0'%20x2%3D'100'%20y2%3D'100'%20stroke%3D'%23fff'%20stroke-width%3D'.1rem'%20%2F%3E%3C/svg%3E");
 }
 
-main {
-	aspect-ratio: 2 / 1;
-	height: 100vh;
-	height: 100svh;
-	margin: auto;
-	position: relative;
-}
-
 .wrapper {
-	aspect-ratio: 2 / 1;
-	height: 80vh;
-	height: 80svh;
+	aspect-ratio: var(--aspect-ratio);
+	height: min(80vh, 47.5vw);
+	height: min(80svh, 47.5vw);
 	margin: 7.5vh auto;
 	margin: 7.5svh auto;
 	position: relative;
@@ -96,11 +98,19 @@ main {
 	background-image: url(images/campus.svg);
 }
 
+@media (max-aspect-ratio: 2/1) { /* hier funktionieren Variablen leider nicht */
+	.wrapper {
+		margin-top: max(12.5vh, 5vw);
+	}
+}
+
 .room {
-	width: 16.5rem;
+	width: 12%;
 	position: absolute;
 	padding-bottom: 1rem;
 	border: .3rem solid var(--white);
+
+	font-size: 100%;
 
 	background-color: var(--cyan);
 	z-index: 0;
@@ -185,22 +195,28 @@ h3 {
 
 .legend {
 	z-index: 5;
-	position: relative;
-	bottom: 4.8vh;
-	bottom: 4.8svh;
+	position: absolute;
+	bottom: 2vh;
+	bottom: 2.7svh;
+	left: calc(50% - 27.5vh);
 	padding: .4vh;
 	padding: .4svh;
 	margin: auto;
-	width: 38.2%;
-	font-size: 3vh;
-	font-size: 3svh;
-	line-height: 3vh;
-	line-height: 3svh;
+	width: 55vh;
+	font-size: 2.8vh;
+	font-size: 2.8svh;
+	line-height: 2.8vh;
+	line-height: 2.8svh;
 	text-align: right;
 
 	border: .4vh solid var(--white);
 	border: .4svh solid var(--white);
 	background-color: var(--cyan);
+}
+
+@media (max-aspect-ratio: 2/1) { /* hier funktionieren Variablen leider nicht */
+	.legend {
+	}
 }
 
 .legend::before {
