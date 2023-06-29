@@ -113,7 +113,7 @@ body::after {
 	font-size: 100%;
 
 	background-color: var(--cyan);
-	z-index: 0;
+	z-index: 1;
 }
 
 h3 {

@@ -95,6 +95,9 @@ async function updateData() { //wenn neue Räume hinzugefügt werden, muss die S
     }
     if ((rooms[i].occupation() == 0) && (rooms[i].roomState != "empty")) { // nur zur Sicherheit; eigentlich (wenn alles funktioniert bei der Tür, der Datenbank und der Verbindung) sollte dieser Fall nicht eintreten
       rooms[i].roomState = "empty";
+    } else if ((rooms[i].occupation() != 0) && (rooms[i].roomState == "empty")) {
+      rooms[i].size = 0;
+      rooms[i].entry = new Array(0);
     }
   }
 }
