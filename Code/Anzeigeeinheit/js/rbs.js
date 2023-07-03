@@ -15,6 +15,7 @@ class Entry {
   remainingTime() { // gibt an, wie lange eine Buchung noch dauert (in Minuten)
     // aktuell wird die Dauer zwischen Startzeitpunkt und Endzeitpunkt ausgegeben; für die spätere Anwendung sollte die Dauer zwischen aktuellem Zeitpunkt und Endzeitpunkt ausgegeben werden
     return Math.round((Date.parse(this.exitTime) - Date.parse(this.entryTime)) / 60000);
+    //return Math.round((Date.parse(this.exitTime) - Date.now()) / 60000);
   }
 }
 
@@ -77,19 +78,23 @@ async function updateData() { //wenn neue Räume hinzugefügt werden, muss die S
 
   for (let i = 0; i < roomsJSON.rooms.length; i++) {
     rooms[i].roomState = roomsJSON.rooms[i].roomState;
-    rooms[i].size = roomsJSON.rooms[i].entry.length;
-    rooms[i].entry = new Array(rooms[i].size);
-    for (let j = 0; j < rooms[i].size; j++) {
-      rooms[i].entry[j] = new Entry;
-      rooms[i].entry[j].userId = roomsJSON.rooms[i].entry[j].userId;
-      if (rooms[i].entry[j].userId != "") {
-        rooms[i].entry[j].entryTime = roomsJSON.rooms[i].entry[j].entryTime;
-        rooms[i].entry[j].exitTime = roomsJSON.rooms[i].entry[j].exitTime;
+    rooms[i].entry = new Array(0);
+    for (let j = 0; j < roomsJSON.rooms[i].entry.length; j++) {
+
+      e = new Entry;
+      e.userId = roomsJSON.rooms[i].entry[j].userId;
+      if (e.userId != "") {
+        e.entryTime = roomsJSON.rooms[i].entry[j].entryTime;
+        e.exitTime = roomsJSON.rooms[i].entry[j].exitTime;
       } else {
-        rooms[i].entry[j].entryTime = new Date();
-        rooms[i].entry[j].exitTime = new Date();
+        e.entryTime = new Date();
+        e.exitTime = new Date();
+      }
+      if (e.remainingTime() > 0) {
+        rooms[i].entry[rooms[i].entry.length] = e;
       }
     }
+    rooms[i].size = rooms[i].entry.length;
     if (((rooms[i].roomState == "quiet") && (rooms[i].occupation() == rooms[i].quietSeats)) || ((rooms[i].roomState == "loud") && (rooms[i].occupation() == rooms[i].loudSeats))) {
       rooms[i].roomState = "full";
     }
