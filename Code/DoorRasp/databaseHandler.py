@@ -69,13 +69,16 @@ class DatabaseHandler:
  
 
     def ScanUserId(self, userId: str):
-        cur = self.mycol.find_one(self.roomId_query, {"entry": {"userId": userId}})
-        results = list(cur)
-        print(results)
-        if len(results) == 0:
+        cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
+
+        results = list(cur)[0]["entry"]
+        if results == []:
             return False
-        else:    
-            return True
+        
+        for entry in results:
+            if userId == entry["userId"]:
+                return True
+        return False
     
     
     def GetExitTimes(self):
