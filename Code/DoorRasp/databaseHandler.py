@@ -5,7 +5,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 class DatabaseHandler:
-    def __init__(self, roomId: str, loudSeats: str, quietSeats: str):
+    def __init__(self, roomId: str, loudSeats: str, quietSeats: str, xPos: str, yPos: str):
         self.roomId = roomId
         uri = "mongodb+srv://raumgestalter01:Projektmanagment2023@raumuebersicht.9ewq6ka.mongodb.net/?retryWrites=true&w=majority"
         # Create a new client and connect to the server
@@ -26,6 +26,8 @@ class DatabaseHandler:
                 "isActive": "True",
                 "loudSeats": loudSeats,
                 "quietSeats": quietSeats,
+                "x": xPos,
+                "y": yPos,
                 "roomState": "Empty",
                 "entry": []
             }

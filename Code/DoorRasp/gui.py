@@ -75,7 +75,8 @@ class Win(tk.Tk):
         self.bind('<Escape>', lambda e: self.destroy())         # close window on esc
         
         # logging into Database
-        self.databaseHandler = DatabaseHandler("C125", 6, 10)
+        config = self.GetConfig()
+        self.databaseHandler = DatabaseHandler(config[0], config[1], config[2], config[3], config[4])
         
         # Initialize RFID Reader
         self.rfidManager = RfidManager()
@@ -93,6 +94,17 @@ class Win(tk.Tk):
         self.bgFrame.pack(fill=tk.BOTH, expand=True)
         self.SelectDefaultFrame()
         
+        
+    def GetConfig(self):
+        if not os.path.isfile("config.txt"):
+            open("config.txt", "x")
+        configList = open("config.txt", "r")
+        
+        data = configList.read()
+        if data:
+            return eval(data)
+        else:
+            return ["C125", 6, 10, "5%", "0%"]
         
         
     #########################
