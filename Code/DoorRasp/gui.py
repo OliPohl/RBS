@@ -235,6 +235,8 @@ class Win(tk.Tk):
     def UpdateDefaultScreen(self, repeat: bool):
         print("Updating Default Screen")
         self.databaseHandler.DeleteExpiredEntries()
+        if roomCurrSeats == 0:
+            self.databaseHandler.SetProperty("roomState", "Empty")
         
         # Update Titlebar Background Color
         self.roomState = self.databaseHandler.GetProperty("roomState")
@@ -266,10 +268,6 @@ class Win(tk.Tk):
             self.loginBtn.config(state="disabled")
         else:
             self.loginBtn.config(state="normal")
-            
-        print(roomCurrSeats)
-        if roomCurrSeats == 0:
-            self.databaseHandler.SetProperty("roomState", "Empty")
             
         # Display current entries
         exitTimes = self.databaseHandler.GetExitTimes()
