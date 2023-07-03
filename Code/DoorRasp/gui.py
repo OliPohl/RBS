@@ -35,6 +35,7 @@ class Win(tk.Tk):
     BLUE = "#187498"
     
     def __init__(self):
+        print("Initializing Tkinter")
         tk.Tk.__init__(self, None)
 
         # changing attribute of the window
@@ -286,7 +287,7 @@ class Win(tk.Tk):
         if repeat != True:
             return
         
-        self.after(60000, self.UpdateDefaultScreen) # update every minute
+        self.after(60000, self.UpdateDefaultScreen(True)) # update every minute
                 
         
         
