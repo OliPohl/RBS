@@ -30,7 +30,7 @@ class Room {
     this.x = x; // X-Koordinate auf der Karte; angegeben in CSS-Einheiten
     this.y = y; // Y-Koordinate auf der Karte; angegeben in CSS-Einheiten
 
-    this.roomState = "empty"; // Status des Raums (empty, full, quiet, loud)
+    this.roomState = "Empty"; // Status des Raums (Empty, Full, Quiet, Loud)
     this.entry = new Array(0);
   }
 
@@ -92,12 +92,12 @@ async function updateData() { //wenn neue Räume hinzugefügt werden, muss die S
       }
     }
     rooms[i].size = rooms[i].entry.length;
-    if (((rooms[i].roomState == "quiet") && (rooms[i].occupation() == rooms[i].quietSeats)) || ((rooms[i].roomState == "loud") && (rooms[i].occupation() == rooms[i].loudSeats)) || (rooms[i].roomState == "Blocked")) {
-      rooms[i].roomState = "full";
+    if (((rooms[i].roomState == "Quiet") && (rooms[i].occupation() == rooms[i].quietSeats)) || ((rooms[i].roomState == "Loud") && (rooms[i].occupation() == rooms[i].loudSeats)) || (rooms[i].roomState == "Blocked")) {
+      rooms[i].roomState = "Full";
     }
-    if ((rooms[i].occupation() == 0) && (rooms[i].roomState != "empty")) { // nur zur Sicherheit; eigentlich (wenn alles funktioniert bei der Tür, der Datenbank und der Verbindung zwischen allem) sollte dieser Fall nicht eintreten
-      rooms[i].roomState = "empty";
-    } else if ((rooms[i].occupation() != 0) && (rooms[i].roomState == "empty")) {
+    if ((rooms[i].occupation() == 0) && (rooms[i].roomState != "Empty")) { // nur zur Sicherheit; eigentlich (wenn alles funktioniert bei der Tür, der Datenbank und der Verbindung zwischen allem) sollte dieser Fall nicht eintreten
+      rooms[i].roomState = "Empty";
+    } else if ((rooms[i].occupation() != 0) && (rooms[i].roomState == "Empty")) {
       rooms[i].size = 0;
       rooms[i].entry = new Array(0);
     }
@@ -124,15 +124,15 @@ function updateRoom(room = new Room()) {
   let htmlroom = document.getElementById(room.id);
   htmlroom.classList.replace(htmlroom.classList[1], room.roomState); //Raumstatus wird geupdatet
   switch (room.roomState) { //Anzahl der belegten Plätze auf der Anzeige wird geupdatet
-    case "loud": {
+    case "Loud": {
       htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.loudSeats + ' Plätzen belegt)';
       break;
     }
-    case "quiet": {
+    case "Quiet": {
       htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.quietSeats + ' Plätzen belegt)';
       break;
     }
-    case "full": {
+    case "Full": {
       htmlroom.querySelector("h3").innerHTML = room.id + ' (' + room.occupation() + ' von ' + room.occupation() + ' Plätzen belegt)';
       break;
     }
