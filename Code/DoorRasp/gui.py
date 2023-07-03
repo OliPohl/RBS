@@ -285,7 +285,7 @@ class Win(tk.Tk):
         
         if repeat != True:
             return
-        print(repeat)
+
         self.after(60000, self.UpdateDefaultScreen, True) # update every minute
                 
         
@@ -356,15 +356,13 @@ class Win(tk.Tk):
                     self.SelectMessageFrame(3)                      # Sucessfully Logged out
                 else:
                     self.SelectMessageFrame(8)                      # If user is not logged in
-            
-        
-        if datetime.now() >= self.timeEnd:
-            if not self.thread.is_alive:
-                self.SelectMessageFrame(0)          # Timeout
-                return
-            
-            self.SelectMessageFrame(0)
+            elif datetime.now() >= self.timeEnd:
+                if not self.thread.is_alive:
+                    self.thread.join()
+
+                self.SelectMessageFrame(0)
             return
+
         
         self.after(1000, lambda: self.ScanId(route))
             
