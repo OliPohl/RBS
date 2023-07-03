@@ -107,12 +107,14 @@ class DatabaseHandler:
         
     def DeleteExpiredEntries(self):
         cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
-        results = dict(cur)
-        for x in results.values():
-            for y in x:
-                exitTime = y["exitTime"]
-                if datetime.now() >= exitTime:
-                    self.DeleteEntry(y["userId"])
+        print(cur)
+
+        # results = dict(cur)
+        # for x in results.values():
+        #     for y in x:
+        #         exitTime = y["exitTime"]
+        #         if datetime.now() >= exitTime:
+        #             self.DeleteEntry(y["userId"])
 
         
     def GetProperty(self, property: str):
@@ -133,8 +135,11 @@ class DatabaseHandler:
 def main():
     databaseHandler = DatabaseHandler("C125", 7, 10)
     
-    databaseHandler.AddEntry("John1232", datetime.now(), datetime.now() + timedelta(hours=1))
-    databaseHandler.DeleteEntry("John1232")
+    databaseHandler.AddEntry("John1232", datetime.now(), datetime.now() + timedelta(minutes=15))
+    databaseHandler.AddEntry("Tom1232", datetime.now(), datetime.now() + timedelta(minutes=30))
+    databaseHandler.AddEntry("jimmy", datetime.now(), datetime.now() + timedelta(minutes=450))
+    databaseHandler.DeleteExpiredEntries()
+        
     databaseHandler.Logout()
 
 
