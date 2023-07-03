@@ -352,15 +352,12 @@ class Win(tk.Tk):
                     self.SelectMessageFrame(3)                      # Sucessfully Logged out
                 else:
                     self.SelectMessageFrame(8)                      # If user is not logged in
-            return
+            
         
         if not self.thread.is_alive:
             print(self.rfidReader.userId)
             self.destroy()
             exit()
-        
-        
-        
         
         # if datetime.now() >= self.timeEnd:
         #     exit()
