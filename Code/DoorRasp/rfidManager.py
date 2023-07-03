@@ -37,13 +37,13 @@ class RfidManager:
                 return
         
         if self.userId == None:
-            self.userId = 0
+            self.userId = "0"
         
             
     
     def CheckId(self, userId: str):
         if len(userId) < 10:
-            return 0
+            return "0"
         return userId
     
     
