@@ -321,12 +321,9 @@ class Win(tk.Tk):
         self.thread = threading.Thread(target=self.rfidManager.ScanId)
         self.thread.daemon = True 
         self.thread.start()
-        self.thread.join(5)
-        print("StartScanIdTread")
         
         
     def ScanId(self, route: int):
-        print("ScanId Loop")
         if self.rfidManager.userId != None:
             self.userId = self.rfidReader.userId
             
@@ -361,7 +358,7 @@ class Win(tk.Tk):
             if not self.thread.is_alive:
                 self.SelectMessageFrame(0)          # Timeout
                 return
-            self.thread.join()
+            self.thread.kill()
             self.SelectMessageFrame(0)
             return
         
