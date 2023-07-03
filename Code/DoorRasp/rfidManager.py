@@ -47,7 +47,7 @@ class RfidManager:
     
     def CheckPermission(self, userId: str):
         adminList = self.GetAdminList()
-        
+        print(adminList + " --- " + userId)
         for id in adminList:
             if id == userId:
                 return True
