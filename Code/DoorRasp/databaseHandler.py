@@ -107,13 +107,12 @@ class DatabaseHandler:
         
     def DeleteExpiredEntries(self):
         cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
-        
-        if cur.values != []:
-            for entry in cur.values:
-                exitTime = entry[2][1]
-
+        results = dict(cur)
+        for x in results.values():
+            for y in x:
+                exitTime = y["exitTime"]
                 if datetime.now() >= exitTime:
-                    self.DeleteEntry(entry[0][1])
+                    self.DeleteEntry(y["userId"])
 
         
     def GetProperty(self, property: str):
