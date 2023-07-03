@@ -316,7 +316,7 @@ class Win(tk.Tk):
         
     def StartScanIdThread(self):
         # Starting a thread to read id parallel to showing the screen
-        self.timeEnd = time.time() + 5
+        self.timeEnd = datetime.now() + timedelta(seconds=10)
         
         self.thread = threading.Thread(target=self.rfidManager.ScanId)
         self.thread.daemon = True 
@@ -354,7 +354,7 @@ class Win(tk.Tk):
                     self.SelectMessageFrame(8)                      # If user is not logged in
             return
         
-        if time.time() < self.timeEnd:
+        if datetime.now() >= self.timeEnd:
             if not self.thread.is_alive:
                 self.SelectMessageFrame(0)          # Timeout
                 return

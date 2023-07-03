@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime, timedelta
 
 class RfidManager:
     def __init__(self) -> None:
@@ -19,9 +20,9 @@ class RfidManager:
     def ScanId(self):
         self.userId = None
 
-        timeEnd = time.time() + 5
+        timeEnd = datetime.now() + timedelta(seconds=10)
         
-        while time.time() < timeEnd:
+        while datetime.now() >= timeEnd:
             if self.isWindows:
                 self.userId = "6339848505320"
 
