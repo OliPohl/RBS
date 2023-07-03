@@ -250,7 +250,7 @@ class Win(tk.Tk):
             roomSeats = self.databaseHandler.GetProperty("quietSeats")
         else:
             self.defaultTitle.config(bg=self.GREEN)
-            currRoomState = "Lehr"
+            currRoomState = "Leer"
             roomSeats = self.databaseHandler.GetProperty("loudSeats")
             
         # Update Titlebar Label
@@ -738,15 +738,15 @@ class Win(tk.Tk):
         elif route == 4:
             self.message.config(text="Vorgang wurde abgebrochen.")
         elif route == 5:
-            self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
+            self.message.config(text="Vorgang wurde durch Zeitüberschreitung beim Anmelden abgebrochen.")
         elif route == 6:
-            self.message.config(text="Sie haben keine Berechtigung um diese Tür zu verwalten.")
+            self.message.config(text="Sie haben keine Berechtigung, diese Tür zu verwalten.")
         elif route == 7:
-            self.message.config(text="Vorgang wurde abgebrochen, durch Zeitüberschreitung beim anmelden.")
+            self.message.config(text="Vorgang wurde durch Zeitüberschreitung beim Anmelden abgebrochen.")
         elif route == 8:
             self.message.config(text="Sie sind nicht in diesem Raum eingeloggt.")
         elif route == 9:
-            self.message.config(text="Tür eigenschaften erfolgreich verändert.")
+            self.message.config(text="Tür Eigenschaften erfolgreich geändert.")
         elif route == 10:
             self.message.config(text="Raum erfolgreich blockiert.")
                 
