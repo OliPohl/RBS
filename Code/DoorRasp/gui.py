@@ -226,7 +226,6 @@ class Win(tk.Tk):
         
     def SettingsWheel(self):
         # Making a Settings button to display on the top right on the default screen
-        print("Pressed Settings Wheel")
         self.settingsWheelFrame = tk.Frame(self)
         
         settingsBtn = tk.Button(self.settingsWheelFrame, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
@@ -284,10 +283,10 @@ class Win(tk.Tk):
                 self.bar[i]["label"].config(text="")
                 self.bar[i]["pb"].config(value=0)
         
-        if repeat != None and repeat != True:
+        if repeat != True:
             return
         
-        self.after(60000, self.UpdateDefaultScreen) # update every minute
+        self.after(60000, self.UpdateDefaultScreen(True)) # update every minute
                 
         
         
