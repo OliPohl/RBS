@@ -109,10 +109,10 @@ class DatabaseHandler:
         cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
         results = dict(cur)
         for entry in cur.values:
-            exitTime =entry[2]
+            exitTime =entry[2][1]
  
             if datetime.now() >= exitTime:
-                self.DeleteEntry(entry[0])
+                self.DeleteEntry(entry[0][1])
 
         
     def GetProperty(self, property: str):
