@@ -29,7 +29,7 @@ class RfidManager:
                 return
                 
             id,text = self.rfid.read()
-            self.userId = self.CheckID(id)
+            self.userId = self.CheckId(id)
             
             print("Scanned user ID: " + self.userId)
             
