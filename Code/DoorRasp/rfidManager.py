@@ -23,7 +23,7 @@ class RfidManager:
         timeEnd = datetime.now() + timedelta(seconds=10)
         
         while datetime.now() >= timeEnd:
-            if self.isWindows:
+            if True:
                 self.userId = "6339848505320"
 
                 print("No RFID Scanner found. \n Posting user ID: " + self.userId)
