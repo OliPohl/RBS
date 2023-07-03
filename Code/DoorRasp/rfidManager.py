@@ -21,7 +21,7 @@ class RfidManager:
         self.userId = None
                
         while True:
-            if True:
+            if self.isWindows:
                 self.userId = "6339848505320"
 
                 print("No RFID Scanner found. \n Posting user ID: " + self.userId)
@@ -33,10 +33,9 @@ class RfidManager:
             print("Scanned user ID: " + self.userId)
             
             if id != None:
-                return
-        
-        if self.userId == None:
-            self.userId = "0"
+                if self.userId == None:
+                    self.userId = "0"
+                return           
         
             
     
