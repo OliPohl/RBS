@@ -122,8 +122,13 @@
       "quietSeats": 3,
       "x": "57%",
       "y": "0",
-      "roomState": "empty",
+      "roomState": "quiet",
       "entry": [
+        {
+          "userId": "John1233332",
+          "entryTime": "2023-06-29T15:57",
+          "exitTime": "2023-06-29T16:30"
+        }
       ]
     },
     {
