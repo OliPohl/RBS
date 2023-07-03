@@ -225,6 +225,7 @@ class Win(tk.Tk):
         
     def SettingsWheel(self):
         # Making a Settings button to display on the top right on the default screen
+        print("Pressed Settings Wheel")
         self.settingsWheelFrame = tk.Frame(self)
         
         settingsBtn = tk.Button(self.settingsWheelFrame, text="⚙️", font=(self.FONT, self.btn1Size, "bold"), fg="White", bg=self.DARK_CYAN, bd=self.borderSize, relief="solid", command=lambda: self.SelectIdFrame(0))
@@ -232,6 +233,7 @@ class Win(tk.Tk):
         
         
     def UpdateDefaultScreen(self, repeat: bool):
+        print("Updating Default Screen")
         self.databaseHandler.DeleteExpiredEntries()
         
         # Update Titlebar Background Color
@@ -316,6 +318,7 @@ class Win(tk.Tk):
         
     def StartScanIdThread(self):
         # Starting a thread to read id parallel to showing the screen
+        print("Starting Id Thread")
         self.timeEnd = datetime.now() + timedelta(seconds=10)
         
         self.thread = threading.Thread(target=self.rfidManager.ScanId)
@@ -324,6 +327,7 @@ class Win(tk.Tk):
         
         
     def ScanId(self, route: int):
+        print("Updating ScanId")
         if self.rfidManager.userId != None:
             self.userId = self.rfidManager.userId
             
@@ -501,6 +505,7 @@ class Win(tk.Tk):
         
         
     def LoginEntry(self):
+        print("Login Entry")
         self.databaseHandler.AddEntry(self.userId, datetime.now(), datetime.now() + timedelta(minutes=self.duration))
         self.databaseHandler.SetProperty("roomState", self.newRoomState)
         
@@ -685,6 +690,7 @@ class Win(tk.Tk):
         
     
     def ConfirmSettings(self):
+        print("Confirming Settings")
         if self.shutdown:
             self.databaseHandler.Logout()
             self.destroy()
@@ -726,6 +732,7 @@ class Win(tk.Tk):
         
     
     def UpdateMessageScreen(self, route: int):
+        print("Updating Message Screen")
         if route == 0:
             self.message.config(text="Die vorgegebene Zeit für den ID-Scan ist abgelaufen, und es wurde keine Hochschul-ID erkannt.")
         elif route == 1:
