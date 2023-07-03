@@ -342,13 +342,13 @@ class Win(tk.Tk):
             if route == 0:
                 if(self.rfidManager.CheckPermission(self.userId)):
                     self.SelectSettingsFrame()
-                    return
-                self.SelectMessageFrame(6)          # Permission Denied
+                else:
+                    self.SelectMessageFrame(6)          # Permission Denied
             elif route == 1:
-                if isUser == True:
+                if isUser:
                     self.SelectMessageFrame(1)          # User Id already logged in
-                    return
-                self.SelectEntryFrame()
+                else:
+                    self.SelectEntryFrame()
             elif route == 2:
                 if isUser:
                     self.databaseHandler.DeleteEntry(self.userId)
@@ -359,7 +359,6 @@ class Win(tk.Tk):
             elif datetime.now() >= self.timeEnd:
                 if not self.thread.is_alive:
                     self.thread.join()
-
                 self.SelectMessageFrame(0)
             return
 
