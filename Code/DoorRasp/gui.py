@@ -285,8 +285,8 @@ class Win(tk.Tk):
         
         if repeat != True:
             return
-        
-        self.after(60000, self.UpdateDefaultScreen(True)) # update every minute
+        print(repeat)
+        self.after(60000, self.UpdateDefaultScreen) # update every minute
                 
         
         
