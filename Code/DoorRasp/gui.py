@@ -638,7 +638,7 @@ class Win(tk.Tk):
         # Reset old state
         self.EnableSettingsShutdownBtns()
         self.EnableSettingsDurationBtns()
-        self.blockDuration = 0dd
+        self.blockDuration = 0
         
         # Setting Label in loud and quiet max seats
         self.currLoudMax = self.databaseHandler.GetProperty("loudSeats")
