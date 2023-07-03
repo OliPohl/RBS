@@ -134,8 +134,7 @@ class DatabaseHandler:
         # property += ": 1, _id: 0"
 
         dict = self.mycol.find_one(self.roomId_query, {property: 1,"_id": 0})
-        print(dict)
-        return dict
+        return dict[property]
     
     
     def GetRoomId(self):
