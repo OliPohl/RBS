@@ -132,7 +132,9 @@ class DatabaseHandler:
         
     def GetProperty(self, property: str):
         property += ": 1, _id: 0"
-        return self.mycol.find_one(self.roomId_query, {property})
+        dict = self.mycol.find_one(self.roomId_query, {property})
+        print(dict)
+        return dict[1]
     
     
     def GetRoomId(self):
