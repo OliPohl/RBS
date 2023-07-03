@@ -325,7 +325,7 @@ class Win(tk.Tk):
         
     def ScanId(self, route: int):
         if self.rfidManager.userId != None:
-            self.userId = self.rfidReader.userId
+            self.userId = self.rfidManager.userId
             
             # Checking if the user id was valid
             if self.userId == "0":
@@ -354,19 +354,13 @@ class Win(tk.Tk):
                     self.SelectMessageFrame(8)                      # If user is not logged in
             
         
-        if not self.thread.is_alive:
-            print(self.rfidReader.userId)
-            self.destroy()
-            exit()
-        
-        # if datetime.now() >= self.timeEnd:
-        #     exit()
-        #     if not self.thread.is_alive:
-        #         self.SelectMessageFrame(0)          # Timeout
-        #         return
+        if datetime.now() >= self.timeEnd:
+            if not self.thread.is_alive:
+                self.SelectMessageFrame(0)          # Timeout
+                return
             
-        #     self.SelectMessageFrame(0)
-        #     return
+            self.SelectMessageFrame(0)
+            return
         
         self.after(1000, lambda: self.ScanId(route))
             
