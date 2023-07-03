@@ -267,6 +267,7 @@ class Win(tk.Tk):
         else:
             self.loginBtn.config(state="normal")
             
+        print(roomCurrSeats)
         if roomCurrSeats == 0:
             self.databaseHandler.SetProperty("roomState", "Empty")
             
