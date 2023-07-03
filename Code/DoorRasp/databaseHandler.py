@@ -71,7 +71,8 @@ class DatabaseHandler:
     def ScanUserId(self, userId: str):
         cur = self.mycol.find_one(self.roomId_query, {"entry": {"userId": userId}})
         results = list(cur)
-        if len(results)==0:
+        print(results)
+        if len(results) == 0:
             return False
         else:    
             return True
