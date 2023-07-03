@@ -19,10 +19,8 @@ class RfidManager:
 
     def ScanId(self):
         self.userId = None
-
-        timeEnd = datetime.now() + timedelta(seconds=10)
-        
-        while datetime.now() >= timeEnd:
+               
+        while True:
             if True:
                 self.userId = "6339848505320"
 
