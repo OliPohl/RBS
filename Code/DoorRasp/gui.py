@@ -355,10 +355,11 @@ class Win(tk.Tk):
             return
         
         if datetime.now() >= self.timeEnd:
+            exit()
             if not self.thread.is_alive:
                 self.SelectMessageFrame(0)          # Timeout
                 return
-            exit()
+            
             self.SelectMessageFrame(0)
             return
         
