@@ -652,15 +652,17 @@ class Win(tk.Tk):
         
     
     def UpdateLoudMaxSettings(self, value: int):
-        if self.currLoudMax > 1:
-            self.currLoudMax += value
-            self.currLoudMaxLabel.config(text=self.currLoudMax)
+        if value == -1 and self.currLoudMax <= 1:
+            return
+        self.currLoudMax += value
+        self.currLoudMaxLabel.config(text=self.currLoudMax)
         
         
     def UpdateQuietMaxSettings(self, value: int):
-        if self.currLoudMax > 1:
-            self.currQuietMax += value
-            self.currQuietMaxLabel.config(text=self.currQuietMax)
+        if value == -1 and self.currQuietMax <= 1:
+            return
+        self.currQuietMax += value
+        self.currQuietMaxLabel.config(text=self.currQuietMax)
         
     
     def UpdateSettingsDuration(self, btn: tk.Button, value: int):
