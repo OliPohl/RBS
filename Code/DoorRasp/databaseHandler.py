@@ -78,31 +78,43 @@ class DatabaseHandler:
     
     
     def GetExitTimes(self):
-        allEntries = self.mycol.find(self.roomId_query, {"entry": {"$all": [["userId", "entryTime", "exitTime"]]}})
+        cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
+
+        results = list(cur)[0]["entry"]
+        if results == []:
+            return []
         
         exitTimes = []
-        for entry in allEntries:
-            exitTime = entry[0][2].strftime("%H:%M")
-            exitTimes.append(exitTime)
-        
+        for entry in results:
+            exitTimes.append(entry["exitTime"].strftime("%H:%M"))
+            
         return exitTimes
     
     
     #soll alle Objekte mit entry:userId,entryTime,exitTime zurückgeben und zählen
     def GetEntryCount(self):
-        cur = self.mycol.find(self.roomId_query, {"entry": {"$all": [["userId", "entryTime", "exitTime"]]}})
+        cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
+
+        results = list(cur)[0]["entry"]
+        if results == []:
+            return 0
+        
         count = 0
-        result = list(cur)
-        for x in result:
+        for entry in results:
             count += 1
-        return count     
+        
+        return count
     
     
     def DeleteAllEntries(self):
-        allEntries = self.mycol.find(self.roomId_query, {"entry": {"$all": [["userId", "entryTime", "exitTime"]]}})
+        cur = self.mycol.find(self.roomId_query, {"entry": 1, "_id": 0})
+
+        results = list(cur)[0]["entry"]
+        if results == []:
+            return
         
-        for entry in allEntries:
-            self.DeleteEntry(entry[0])
+        for entry in results:
+            self.DeleteEntry(entry["userId"])
         
         
     def DeleteExpiredEntries(self):
