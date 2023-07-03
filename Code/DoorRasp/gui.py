@@ -316,9 +316,12 @@ class Win(tk.Tk):
         
     def StartScanIdThread(self):
         # Starting a thread to read id parallel to showing the screen
+        self.timeEnd = time.time() + 5
+        
         self.thread = threading.Thread(target=self.rfidManager.ScanId)
         self.thread.daemon = True 
         self.thread.start()
+        self.thread.join(5)
         
         
     def ScanId(self, route: int):
@@ -350,6 +353,10 @@ class Win(tk.Tk):
                     self.SelectMessageFrame(3)                      # Sucessfully Logged out
                 else:
                     self.SelectMessageFrame(8)                      # If user is not logged in
+            return
+        
+        if not self.thread.is_alive and time.time() < self.timeEnd:
+            self.SelectMessageFrame(0)          # Timeout
             return
         
         self.after(1000, lambda: self.ScanId(route))
