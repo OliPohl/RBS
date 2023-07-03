@@ -8,7 +8,7 @@ class RfidManager:
         if os.name == "nt":
             self.isWindows = True
             return
-        self.isWindows = True
+        self.isWindows = False
         
         import RPi.GPIO as GPIO
         from mfrc522 import SimpleMFRC522

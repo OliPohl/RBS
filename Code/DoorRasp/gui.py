@@ -254,7 +254,7 @@ class Win(tk.Tk):
             roomSeats = self.databaseHandler.GetProperty("loudSeats")
             
         # Update Titlebar Label
-        roomId = self.databaseHandler.GetRoomId()
+        roomId = self.databaseHandler.roomId
         roomCurrSeats = self.databaseHandler.GetEntryCount()
         
         self.defaultTitle.config(text="{roomId} - {roomState} - {roomCurrSeats}/{roomSeats}".format(roomId=roomId, roomState=currRoomState, roomCurrSeats=roomCurrSeats, roomSeats=roomSeats))
@@ -491,12 +491,7 @@ class Win(tk.Tk):
         
         
     def LoginEntry(self):
-        exitTime = datetime.now().time()
-        exitTime = datetime.combine(datetime.today(), exitTime)
-        exitTime = exitTime + timedelta(minutes=self.duration)
-        exitTime = exitTime.time().strftime("%H:%M")
-
-        self.databaseHandler.AddEntry(self.userId, datetime.now().time().strftime("%H:%M"), exitTime)
+        self.databaseHandler.AddEntry(self.userId, datetime.now(), datetime.now() + timedelta(minutes=self.duration))
         self.databaseHandler.SetProperty("roomState", self.newRoomState)
         
         self.SelectMessageFrame(2)
@@ -693,14 +688,8 @@ class Win(tk.Tk):
         if self.blockDuration > 0:
             self.databaseHandler.SetProperty("roomState", "Blocked")
             self.databaseHandler.DeleteAllEntries()
-            
-            # add entry from user who blocked the room
-            exitTime = datetime.now().time()
-            exitTime = datetime.combine(datetime.today(), exitTime)
-            exitTime = exitTime + timedelta(minutes=self.blockDuration)
-            exitTime = exitTime.time().strftime("%H:%M")
 
-            self.databaseHandler.AddEntry(self.userId, datetime.now().time().strftime("%H:%M"), exitTime)
+            self.databaseHandler.AddEntry(self.userId, datetime.now(), datetime.now() + timedelta(minutes=self.blockDuration))
             self.SelectMessageFrame(10)
         else:
             self.SelectMessageFrame(9)

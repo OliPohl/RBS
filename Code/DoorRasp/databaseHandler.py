@@ -76,16 +76,17 @@ class DatabaseHandler:
         else:    
             return True
     
-#     def GetExitTimes(self):
-#         entries = self.GetProperty("entry")
+    
+    def GetExitTimes(self):
+        allEntries = self.mycol.find(self.roomId_query, {"entry": {"$all": [["userId", "entryTime", "exitTime"]]}})
         
-#         if entries == []:
-#            return []
-       
-#         exitTimes = []
-#         for entry in entries:
-#             exitTimes.append(entry["exitTime"])
-#         return exitTimes
+        exitTimes = []
+        for entry in allEntries:
+            exitTime = entry[0][2].strftime("%H:%M")
+            exitTimes.append(exitTime)
+        
+        return exitTimes
+    
     
     #soll alle Objekte mit entry:userId,entryTime,exitTime zurückgeben und zählen
     def GetEntryCount(self):
@@ -97,9 +98,11 @@ class DatabaseHandler:
         return count     
     
     
-#     def DeleteAllEntries(self):
-#         self.UpdateDatabase("entry", [])
-#         print("Deleted all entries for Room {roomId}.".format(roomId=self.roomId))
+    def DeleteAllEntries(self):
+        allEntries = self.mycol.find(self.roomId_query, {"entry": {"$all": [["userId", "entryTime", "exitTime"]]}})
+        
+        for entry in allEntries:
+            self.DeleteEntry(entry[0])
         
         
     def DeleteExpiredEntries(self):
