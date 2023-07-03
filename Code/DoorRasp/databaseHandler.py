@@ -131,8 +131,9 @@ class DatabaseHandler:
 
         
     def GetProperty(self, property: str):
-        property += ": 1, _id: 0"
-        dict = self.mycol.find(self.roomId_query, {property})
+        # property += ": 1, _id: 0"
+
+        dict = self.mycol.find(self.roomId_query, {property: 1,"_id": 0})
         print(dict)
         return dict
     
