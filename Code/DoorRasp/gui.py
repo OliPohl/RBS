@@ -284,7 +284,7 @@ class Win(tk.Tk):
                 self.bar[i]["label"].config(text="")
                 self.bar[i]["pb"].config(value=0)
         
-        if repeat != True:
+        if repeat != None and repeat != True:
             return
         
         self.after(60000, self.UpdateDefaultScreen) # update every minute
