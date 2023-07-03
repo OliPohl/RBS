@@ -1,51 +1,71 @@
 var http = require('http');
 var url = require('url');
 var fs = require('fs');
-//var MongoClient = require('mongodb').MongoClient;
+var path = require('path');
 
-
+var jsonPath = path.join(__dirname, 'js', 'data.json');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://raumgestalter01:Projektmanagment2023@raumuebersicht.9ewq6ka.mongodb.net/?retryWrites=true&w=majority";
-/*MongoClient.connect(uri, function(err, db) {
-  if (err) throw err;
-  console.log("Database created!");
-  db.close();
-});*/
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+var uri = "mongodb+srv://raumgestalter01:Projektmanagment2023@raumuebersicht.9ewq6ka.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
-    //deprecationErrors: true,
+    deprecationErrors: true,
   }
 });
+var minutes = 1, the_interval = minutes * 60 * 100;
 async function run() {
   try {
-    // Connect the client to the server    (optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    await client.connect().then();
+    const daba = client.db("Raumuebersicht");
+    const col = daba.collection("raeume");
+    setInterval(async function(){
+      fs.writeFileSync(jsonPath, '', function(err){if (err) throw err;})
+      var stream = fs.createWriteStream(jsonPath, {flags:'a'});
+      stream.write("{");
+      let string1 = "rooms";
+      let jsonStr1 = JSON.stringify(string1);
+      stream.write(jsonStr1);
+      stream.write(":[");
+      var dataSet = await daba.collection("raeume").find().toArray();
+      console.log(dataSet);
+      for await(var doc of dataSet) {
+        let data = JSON.stringify(doc);
+        console.log(data);
+        stream.write(data);
+      }
+      stream.write("]}");
+      stream.end();  
+    }, the_interval);  
   } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
+    //await client.close();
+  }  
 }
 run().catch(console.dir);
-
-
 
 /*console.log('Lokaler Server erstellt. Guck mal hier: http://localhost:8080/index.html');
 console.log('Strg + C zum Stoppen');*/
 
 http.createServer(function (req, res) {
   var q = url.parse(req.url, true);
-  var filename = "." + q.pathname;
+  var filename = path.join(__dirname, q.pathname) ;
   fs.readFile(filename, function(err, data) {
     if (err) {
+      console.log(err);
       res.writeHead(404, {'Content-Type': 'text'});
       return res.end("404 Not Found");
     }
+    var validExtensions = {
+      ".html" : "text/html",
+      ".js": "application/javascript",
+      ".css": "text/css",
+      ".txt": "text/plain",
+      ".jpg": "image/jpeg",
+      ".gif": "image/gif",
+      ".png": "image/png",
+      ".woff": "application/font-woff",
+      ".woff2": "application/font-woff2"
+    };
     res.writeHead(200, {'Content-Type': 'text'});
     res.write(data);
     return res.end();
