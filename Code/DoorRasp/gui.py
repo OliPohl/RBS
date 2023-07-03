@@ -358,7 +358,7 @@ class Win(tk.Tk):
             if not self.thread.is_alive:
                 self.SelectMessageFrame(0)          # Timeout
                 return
-            self.thread.kill()
+            raise Exception
             self.SelectMessageFrame(0)
             return
         
