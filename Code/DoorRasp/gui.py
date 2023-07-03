@@ -235,6 +235,7 @@ class Win(tk.Tk):
     def UpdateDefaultScreen(self, repeat: bool):
         print("Updating Default Screen")
         self.databaseHandler.DeleteExpiredEntries()
+        roomCurrSeats = self.databaseHandler.GetEntryCount()
         if roomCurrSeats == 0:
             self.databaseHandler.SetProperty("roomState", "Empty")
         
@@ -259,7 +260,6 @@ class Win(tk.Tk):
             
         # Update Titlebar Label
         roomId = self.databaseHandler.roomId
-        roomCurrSeats = self.databaseHandler.GetEntryCount()
         
         self.defaultTitle.config(text="{roomId} - {roomState} - {roomCurrSeats}/{roomSeats}".format(roomId=roomId, roomState=currRoomState, roomCurrSeats=roomCurrSeats, roomSeats=roomSeats))
         
