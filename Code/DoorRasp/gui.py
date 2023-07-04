@@ -285,8 +285,7 @@ class Win(tk.Tk):
         exitTimes = self.databaseHandler.GetExitTimes()
         for i in range(10):
             if i < len(exitTimes):    
-                print(exitTimes[i] + " " + datetime.now() + timedelta(hours=2))
-                timeDelta =  (datetime.now() + timedelta(hours=2)) - exitTimes[i]
+                timeDelta =  datetime.now() + timedelta(hours=2) - exitTimes[i]
                 minuteDelta = timeDelta.seconds // 60
                 
                 self.bar[i]["label"].config(text=minuteDelta)
