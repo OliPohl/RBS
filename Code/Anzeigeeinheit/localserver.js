@@ -29,10 +29,15 @@ async function run() {
       stream.write(":[");
       var dataSet = await daba.collection("raeume").find().toArray();
       console.log(dataSet);
+      var zaehler = 0;
       for await(var doc of dataSet) {
+        if (zaehler > 0) {
+          stream.write(",");
+        }
         let data = JSON.stringify(doc);
         console.log(data);
         stream.write(data);
+        zaehler = zaehler + 1;
       }
       stream.write("]}");
       stream.end();  
