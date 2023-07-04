@@ -122,31 +122,31 @@ h3 {
 	line-height: 1rem;
 }
 
-.empty {
+.Empty {
 	padding-bottom: 0;
 }
 
-.empty h3 {
+.Empty h3 {
 	border-bottom: 0;
 }
 
-.legend .empty,
-.empty h3 {
+.legend .Empty,
+.Empty h3 {
 	background-color: var(--green);
 }
 
-.legend .full,
-.full h3 {
+.legend .Full,
+.Full h3 {
 	background-color: var(--red);
 }
 
-.legend .quiet,
-.quiet h3 {
+.legend .Quiet,
+.Quiet h3 {
 	background-color: var(--blue);
 }
 
-.legend .loud,
-.loud h3 {
+.legend .Loud,
+.Loud h3 {
 	background-color: var(--yellow);
 }
 

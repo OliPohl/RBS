@@ -7,7 +7,7 @@
       "quietSeats": 2,
       "x": "5%",
       "y": "0",
-      "roomState": "quiet",
+      "roomState": "Quiet",
       "entry": [
         {
           "userId": "John1233332",
@@ -23,7 +23,7 @@
       "quietSeats": 2,
       "x": "18%",
       "y": "0",
-      "roomState": "quiet",
+      "roomState": "Quiet",
       "entry": [
         {
           "userId": "John1233332",
@@ -44,7 +44,7 @@
       "quietSeats": 4,
       "x": "31%",
       "y": "0",
-      "roomState": "loud",
+      "roomState": "Loud",
       "entry": [
         {
           "userId": "John1233332",
@@ -70,7 +70,7 @@
       "quietSeats": 3,
       "x": "83%",
       "y": "0",
-      "roomState": "loud",
+      "roomState": "Loud",
       "entry": [
         {
           "userId": "John1233332",
@@ -96,7 +96,7 @@
       "quietSeats": 3,
       "x": "70%",
       "y": "0",
-      "roomState": "loud",
+      "roomState": "Loud",
       "entry": [
         {
           "userId": "John1233332",
@@ -122,8 +122,13 @@
       "quietSeats": 3,
       "x": "57%",
       "y": "0",
-      "roomState": "empty",
+      "roomState": "Quiet",
       "entry": [
+        {
+          "userId": "John1233332",
+          "entryTime": "2023-06-29T15:57",
+          "exitTime": "2023-06-29T16:30"
+        }
       ]
     },
     {
@@ -133,7 +138,7 @@
       "quietSeats": 1,
       "x": "25%",
       "y": "60%",
-      "roomState": "quiet",
+      "roomState": "Quiet",
       "entry": [
         {
           "userId": "John1233332",
