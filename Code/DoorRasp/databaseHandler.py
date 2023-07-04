@@ -1,12 +1,10 @@
 import os
 import pymongo
 from datetime import datetime, timedelta, timezone
-from tzlocal import get_localzone
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 class DatabaseHandler:
-    UTC_DT = datetime.now(timezone.utc)    
     def __init__(self, roomId: str, loudSeats: str, quietSeats: str, xPos: str, yPos: str):
         self.roomId = roomId
         uri = "mongodb+srv://raumgestalter01:Projektmanagment2023@raumuebersicht.9ewq6ka.mongodb.net/?retryWrites=true&w=majority"
@@ -133,7 +131,7 @@ class DatabaseHandler:
             return
         
         for entry in results:
-            if self.UTC_DT.astimezone(get_localzone()).isoformat() >= entry["exitTime"]:
+            if datetime.now(timezone(timedelta(hours=2))) >= entry["exitTime"]:
                 self.DeleteEntry(entry["userId"])
 
 
@@ -158,9 +156,9 @@ class DatabaseHandler:
 def main():
     databaseHandler = DatabaseHandler("C125", 7, 10)
     
-    databaseHandler.AddEntry("John1232", databaseHandler.UTC_DT.astimezone(get_localzone()).isoformat(), databaseHandler.UTC_DT.astimezone(get_localzone()).isoformat() + timedelta(minutes=15))
-    databaseHandler.AddEntry("Tom1232", databaseHandler.UTC_DT.astimezone(get_localzone()).isoformat(), databaseHandler.UTC_DT.astimezone(get_localzone()).isoformat() + timedelta(minutes=30))
-    databaseHandler.AddEntry("jimmy", databaseHandler.UTC_DT.astimezone(get_localzone()).isoformat(), databaseHandler.UTC_DT.astimezone(get_localzone()).isoformat() + timedelta(minutes=450))
+    databaseHandler.AddEntry("John1232", datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=15))
+    databaseHandler.AddEntry("Tom1232", datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=30))
+    databaseHandler.AddEntry("jimmy", datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=450))
     databaseHandler.DeleteExpiredEntries()
         
     databaseHandler.Logout()
