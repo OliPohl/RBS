@@ -2,7 +2,7 @@ const maxTime = 90; // Anzeige auf die nächsten 90 Minuten begrenzt => das ist 
 const standardValueTime = '0'; // wird als Startwert für das Attribut remainingTime verwendet => sollte sich die Konstante im Javascript ändern, muss auch das CSS angepasst werden
 const dataURL = "js/data.json"; // JSON-Datei mit den Daten
 var rooms = new Array;
-const updateFrequency = 30000; // Aktualisierungsrate in Millisekunden
+const updateFrequency = 3000; // Aktualisierungsrate in Millisekunden
 
 
 /* Jeder Eintrag (Entry) ist eine Buchung */
@@ -16,7 +16,7 @@ class Entry {
   remainingTime() { // gibt an, wie lange eine Buchung noch dauert (in Minuten)
     // obere Zeile wird die Dauer zwischen Startzeitpunkt und Endzeitpunkt ausgegeben (für Testzwecke sinnvoll); für die spätere Anwendung sollte die Dauer zwischen aktuellem Zeitpunkt und Endzeitpunkt ausgegeben werden (untere Zeile)
     //return Math.round((Date.parse(this.exitTime) - Date.parse(this.entryTime)) / 60000);
-    return Math.round((Date.parse(this.exitTime) - Date.now()) / 60000);
+    return Math.round(((Date.parse(this.exitTime) - Date.now()) / 60000) - 120); // Probleme durch Zeitzonen rausrechnen => funktioniert aktuell nur während der Sommerzeit
   }
 }
 
