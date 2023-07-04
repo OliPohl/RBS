@@ -1,6 +1,6 @@
 import os
 import pymongo
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -92,7 +92,7 @@ class DatabaseHandler:
         
         exitTimes = []
         for entry in results:
-            exitTimes.append(entry["exitTime"].strftime("%H:%M"))
+            exitTimes.append(entry["exitTime"])
             
         return exitTimes
     
@@ -131,7 +131,7 @@ class DatabaseHandler:
             return
         
         for entry in results:
-            if datetime.now() >= entry["exitTime"]:
+            if datetime.now(timezone(timedelta(hours=2))) >= entry["exitTime"]:
                 self.DeleteEntry(entry["userId"])
 
 
@@ -156,9 +156,9 @@ class DatabaseHandler:
 def main():
     databaseHandler = DatabaseHandler("C125", 7, 10)
     
-    databaseHandler.AddEntry("John1232", datetime.now(), datetime.now() + timedelta(minutes=15))
-    databaseHandler.AddEntry("Tom1232", datetime.now(), datetime.now() + timedelta(minutes=30))
-    databaseHandler.AddEntry("jimmy", datetime.now(), datetime.now() + timedelta(minutes=450))
+    databaseHandler.AddEntry("John1232", datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=15))
+    databaseHandler.AddEntry("Tom1232", datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=30))
+    databaseHandler.AddEntry("jimmy", datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=450))
     databaseHandler.DeleteExpiredEntries()
         
     databaseHandler.Logout()
