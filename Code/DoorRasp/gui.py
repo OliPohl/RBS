@@ -10,6 +10,7 @@ from screeninfo import get_monitors
 from time import strftime
 from time import time
 from datetime import datetime, timedelta, timezone
+from tzlocal import get_localzone
 
 from databaseHandler import *
 from rfidManager import *
@@ -33,6 +34,8 @@ class Win(tk.Tk):
     YELLOW = "#b9a21c"
     GREEN = "#36AE7C"
     BLUE = "#187498"
+    
+    UTC_DT = datetime.now(timezone.utc)    
     
     def __init__(self):
         print("Initializing Tkinter")
@@ -285,7 +288,7 @@ class Win(tk.Tk):
         exitTimes = self.databaseHandler.GetExitTimes()
         for i in range(10):
             if i < len(exitTimes):    
-                timeDelta =  datetime.now(timezone(timedelta(hours=2))) - exitTimes[i]
+                timeDelta =  self.UTC_DT.astimezone(get_localzone()).isoformat() - exitTimes[i]
                 minuteDelta = timeDelta.seconds // 60
                 
                 self.bar[i]["label"].config(text=minuteDelta)
@@ -330,7 +333,7 @@ class Win(tk.Tk):
     def StartScanIdThread(self):
         # Starting a thread to read id parallel to showing the screen
         print("Starting Id Thread")
-        self.timeEnd = datetime.now(timezone(timedelta(hours=2))) + timedelta(seconds=10)
+        self.timeEnd = self.UTC_DT.astimezone(get_localzone()).isoformat() + timedelta(seconds=10)
         
         self.thread = threading.Thread(target=self.rfidManager.ScanId)
         self.thread.daemon = True 
@@ -367,7 +370,7 @@ class Win(tk.Tk):
                     self.SelectMessageFrame(3)                      # Sucessfully Logged out
                 else:
                     self.SelectMessageFrame(8)                      # If user is not logged in
-            elif datetime.now(timezone(timedelta(hours=2))) >= self.timeEnd:
+            elif self.UTC_DT.astimezone(get_localzone()).isoformat() >= self.timeEnd:
                 if not self.thread.is_alive:
                     self.thread.join()
                 self.SelectMessageFrame(0)
@@ -514,7 +517,7 @@ class Win(tk.Tk):
         
     def LoginEntry(self):
         print("Login Entry")
-        self.databaseHandler.AddEntry(self.userId, datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=self.duration))
+        self.databaseHandler.AddEntry(self.userId, self.UTC_DT.astimezone(get_localzone()).isoformat(), self.UTC_DT.astimezone(get_localzone()).isoformat() + timedelta(minutes=self.duration))
         self.databaseHandler.SetProperty("roomState", self.newRoomState)
         
         self.SelectMessageFrame(2)
@@ -717,7 +720,7 @@ class Win(tk.Tk):
             self.databaseHandler.SetProperty("roomState", "Blocked")
             self.databaseHandler.DeleteAllEntries()
 
-            self.databaseHandler.AddEntry(self.userId, datetime.now(timezone(timedelta(hours=2))), datetime.now(timezone(timedelta(hours=2))) + timedelta(minutes=self.blockDuration))
+            self.databaseHandler.AddEntry(self.userId, self.UTC_DT.astimezone(get_localzone()).isoformat(), self.UTC_DT.astimezone(get_localzone()).isoformat() + timedelta(minutes=self.blockDuration))
             self.SelectMessageFrame(10)
         else:
             self.SelectMessageFrame(9)
