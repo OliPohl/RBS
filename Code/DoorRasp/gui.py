@@ -368,8 +368,6 @@ class Win(tk.Tk):
                 else:
                     self.SelectMessageFrame(8)                      # If user is not logged in
             elif datetime.now() >= self.timeEnd:
-                if not self.thread.is_alive:
-                    self.thread.join()
                 self.SelectMessageFrame(0)
             return
 
