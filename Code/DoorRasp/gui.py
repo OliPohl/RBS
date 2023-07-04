@@ -188,7 +188,7 @@ class Win(tk.Tk):
     def UpdateClock(self):                              # takes the clock on the bottom left and updates it every second
         time = strftime('%H:%M')
         self.clock.config(text=time)
-        self.after(20000, self.UpdateClock)
+        self.after(60000, self.UpdateClock)
         
         
         
