@@ -58,10 +58,10 @@ async function getData() {
 
   for (let i = 0; i < roomsJSON.rooms.length; i++) {
     rooms.push(new Room(
-      roomsJSON.rooms[i].id,
+      roomsJSON.rooms[i]._id,
       roomsJSON.rooms[i].isActive,
-      roomsJSON.rooms[i].loudSeats,
-      roomsJSON.rooms[i].quietSeats,
+      parseInt(roomsJSON.rooms[i].loudSeats),
+      parseInt(roomsJSON.rooms[i].quietSeats),
       roomsJSON.rooms[i].x,
       roomsJSON.rooms[i].y
     ));
