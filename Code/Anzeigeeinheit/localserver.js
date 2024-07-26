@@ -54,6 +54,11 @@ console.log('Strg + C zum Stoppen');*/
 http.createServer(function (req, res) {
   var q = url.parse(req.url, true);
   var filename = path.join(__dirname, q.pathname) ;
+    if (path.normalize(decodeURI(q.pathname)) !== decodeURI(q.pathname)) {
+        res.statusCode = 403;
+        res.end();
+        return;
+    }
   fs.readFile(filename, function(err, data) {
     if (err) {
       console.log(err);
